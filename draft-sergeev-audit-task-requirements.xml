@@ -1,0 +1,984 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="info" consensus="false" docName="draft-sergeev-audit-task-requirements-00" ipr="trust200902" submissionType="IETF" version="3" sortRefs="true" symRefs="true" tocInclude="true" tocDepth="3">
+  <front>
+    <title abbrev="Audit Task Evidence Requirements">Task-Relative Evidence Requirements for Agent Auditing</title>
+    <author fullname="Mikhail Sergeev" initials="M." surname="Sergeev">
+      <organization>Independent Researcher</organization>
+      <address>
+        <email>mikhailsergeev369@gmail.com</email>
+      </address>
+    </author>
+    <date year="2026" month="October" day="15"/>
+    <keyword>audit</keyword>
+    <keyword>agents</keyword>
+    <keyword>evidence</keyword>
+    <keyword>interoperability</keyword>
+    <abstract>
+      <t>Agent auditing can rely on information produced by users, agents, tools, services, policy components, and other systems across multiple administrative domains. The evidence needed to answer one auditing question is not necessarily the evidence needed to answer another. Successful verification of available evidence also does not, by itself, establish that the evidence is applicable or sufficient for the question being evaluated.</t>
+      <t>This document describes a representation-independent model for stating an Audit Task, alternative evidence requirements for that task, expectations about evidence production, and the basis for an audit result. It distinguishes verification of evidence from evaluation of the Audit Task, missing evidence from a negative observation, and validity of individual records from cross-domain sufficiency. It defines no audit record format, verification mechanism, authorization model, completeness mechanism, storage protocol, or auditing policy.</t>
+    </abstract>
+    <note removeInRFC="true">
+      <name>Discussion Venues</name>
+      <t>This is an individual working draft, not a working-group document.</t>
+      <t>Related discussion is archived on the <eref target="https://mailarchive.ietf.org/arch/browse/audit/">AUDIT mailing list</eref>. Discussion does not establish IETF or working-group consensus.</t>
+    </note>
+  </front>
+  <middle>
+    <section anchor="introduction">
+      <name>Introduction</name>
+      <t>Cross-domain agent auditing requires more than collecting records and checking their integrity.</t>
+      <t>A single logical operation can produce evidence at several boundaries. A user interface can record an approval. An authorization component can record a decision. An agent or gateway can record an invocation. A service can record a request or resulting state change. These records can refer to the same operation while supporting answers to different questions.</t>
+      <t>For example, evidence that a refund was authorized does not establish that it was invoked. Evidence that it was invoked does not establish that the provider committed the refund. A provider-side record stating that a refund was committed does not, by itself, establish that the action was authorized. A signature, receipt, or transparency registration can establish properties of an artifact without establishing the truth of every assertion carried by that artifact.</t>
+      <t>Across administrative domains, no single participant necessarily has complete visibility into the interaction chain. Different participants can use different record formats, observe different boundaries, and apply different retention, disclosure, or verification mechanisms. Missing evidence can mean that an expected item is unavailable, that no item was expected from a participant, that an event fell outside the participant's coverage, or that the applicable expectation is unknown.</t>
+      <t>This document describes a task-relative model for making those distinctions explicit. The model is intended as problem-space and requirements input for possible AUDIT work.</t>
+      <t>The model can be used by an Auditor in the architecture described in <xref target="AUDIT-ARCH"/> to identify the evidence needed for a particular auditing question and report the basis and limitations of the result.</t>
+      <section anchor="key-separations">
+        <name>Key Separations</name>
+        <t>The model depends on four separations.</t>
+        <t>
+          <strong>Audit Scope is not Evidence Coverage.</strong> Audit Scope identifies what the auditor is trying to evaluate. Evidence Coverage describes what a particular source or mechanism is represented or expected to observe or record.</t>
+        <t>
+          <strong>Evidence Requirements are not Evidence Production Expectations.</strong> Evidence requirements identify what is needed to answer an Audit Task. Production expectations identify what a particular source or mechanism was expected to produce.</t>
+        <t>
+          <strong>The Audit Evidence Set is not the Evaluation Basis.</strong> The Audit Evidence Set is what is available to an auditor. The Evaluation Basis identifies what evidence, procedures, profiles, and assumptions were actually used to produce a result.</t>
+        <t>
+          <strong>An Evidence Verification Result is not an Audit Evaluation Result.</strong> Verification reports properties established by a verification procedure. An Audit Evaluation Result answers the substantive Audit Task to the extent supported by the Evaluation Basis.</t>
+        <t>These separations allow a specification or deployment to report a bounded result without silently turning record presence, successful verification, or record absence into a stronger conclusion.</t>
+      </section>
+      <section anchor="goal">
+        <name>Goal</name>
+        <t>This document provides a common vocabulary for describing:</t>
+        <ul>
+          <li>
+            <t>the auditing question and its scope;</t>
+          </li>
+          <li>
+            <t>one or more alternative evidence combinations sufficient to evaluate that question;</t>
+          </li>
+          <li>
+            <t>what identified participants or mechanisms are expected to produce;</t>
+          </li>
+          <li>
+            <t>what evidence is available, verified, and applicable;</t>
+          </li>
+          <li>
+            <t>what evidence and assumptions were actually used;</t>
+          </li>
+          <li>
+            <t>and the bounded Audit Evaluation Result that follows.</t>
+          </li>
+        </ul>
+        <t>The model supports identifying task-sufficient evidence combinations. Different combinations can satisfy the same task-relative requirements under stated assumptions. The model does not define a minimization criterion or require a unique minimum.</t>
+      </section>
+      <section anchor="scope-and-non-goals">
+        <name>Scope and Non-Goals</name>
+        <t>This document addresses task-relative evidence requirements and evaluation for observable audit information in distributed and delegated systems.</t>
+        <t>It does not define:</t>
+        <ul>
+          <li>
+            <t>an audit record or conversation format;</t>
+          </li>
+          <li>
+            <t>an Audit Store or query protocol;</t>
+          </li>
+          <li>
+            <t>a transport or context-propagation protocol;</t>
+          </li>
+          <li>
+            <t>a new identity, authorization, or enforcement mechanism;</t>
+          </li>
+          <li>
+            <t>a verification, attestation, transparency, or omission-control mechanism;</t>
+          </li>
+          <li>
+            <t>a trust score, assurance level, or compliance framework;</t>
+          </li>
+          <li>
+            <t>a relying-party decision policy;</t>
+          </li>
+          <li>
+            <t>or a model of internal reasoning or hidden chain-of-thought.</t>
+          </li>
+        </ul>
+        <t>The model describes evidence properties, sources, Observation Boundaries, Evidence Coverage, Evidence Relations, Evidence Applicability, and Evidence Verification Results independently of any particular record format, field name, extension point, container, or serialization. A profile or mapping can bind these semantic requirements to concrete representations.</t>
+        <t>The document does not attempt to establish why an agent internally selected an action. It deals with observable evidence and represented relationships.</t>
+        <t>The specification that defines a native record or result remains authoritative for its semantics. This document does not reinterpret native authorization, execution, effect, attestation, or transparency results. It describes how those bounded results can be required, expected, combined, or found insufficient for a cross-domain Audit Task.</t>
+        <t>An <strong>Audit Task</strong> in this document is an auditing question. It is not an agent-protocol task, workload object, dialog state, or execution unit.</t>
+        <t>This document specifies no BCP 14 requirements.</t>
+      </section>
+    </section>
+    <section anchor="terminology">
+      <name>Terminology</name>
+      <t>The following terms are limited to the task-relative model.</t>
+      <section anchor="audit-task">
+        <name>Audit Task</name>
+        <t>
+          <strong>Audit Task:</strong> A specific question to be evaluated using audit evidence.</t>
+        <t>Examples include whether an action was authorized, whether an operation was invoked, whether an external effect was observed, whether a distributed workflow was internally consistent, or whether an action was within the authority applicable at a particular time.</t>
+        <t>Different Audit Tasks concerning the same logical operation can require different evidence.</t>
+      </section>
+      <section anchor="audit-scope">
+        <name>Audit Scope</name>
+        <t>
+          <strong>Audit Scope:</strong> The actors, events, states, relationships, resources, and time interval to which an Audit Task applies.</t>
+        <t>Audit Scope describes what is being evaluated.</t>
+      </section>
+      <section anchor="audit-evidence-item">
+        <name>Audit Evidence Item</name>
+        <t>
+          <strong>Audit Evidence Item:</strong> A record, observation, disclosed portion of a record, receipt, attestation result, external-state artifact, response, measurement, or other information considered when evaluating an Audit Task.</t>
+        <t>An item can be authentic, structurally valid, or successfully verified while still being inapplicable, insufficient, contradictory, or unable to support a stronger conclusion.</t>
+        <t>The term is generic audit terminology and does not redefine <strong>Evidence</strong> as used by the Remote ATtestation procedureS (RATS) architecture <xref target="RFC9334"/>.</t>
+      </section>
+      <section anchor="audit-evidence-set">
+        <name>Audit Evidence Set</name>
+        <t>
+          <strong>Audit Evidence Set:</strong> The collection of Audit Evidence Items available to a particular auditor for evaluating an Audit Task.</t>
+        <t>An item that exists elsewhere in a system is not necessarily part of the Audit Evidence Set available to that auditor. Different auditors can therefore have different Audit Evidence Sets for the same underlying events.</t>
+      </section>
+      <section anchor="evidence-requirement-set">
+        <name>Evidence Requirement Set</name>
+        <t>
+          <strong>Evidence Requirement Set:</strong> A set of conditions on evidence that, when satisfied under the applicable assumptions, is sufficient to evaluate an Audit Task to a stated extent.</t>
+        <t>A set can identify required evidence classes, sources, recipients or holders, delivery or retention conditions, Observation Boundaries, temporal or historical-state conditions, coverage properties, and relationships among items.</t>
+        <t>An Audit Task can have multiple alternative Evidence Requirement Sets. An Evidence Requirement Set states semantic conditions on evidence; it does not prescribe carrier-native fields or extension points. The document does not assume one unique or globally minimal evidence set.</t>
+        <t>An Evidence Requirement Set in this document is an auditor-side condition for evaluating an Audit Task. It is distinct from any native pre-execution or admission evidence requirement used by an executor or enforcement boundary.</t>
+        <t>An Evidence Requirement Set identifies the conclusion, or class of conclusions, it can support under stated assumptions. Failure to satisfy that set does not establish the opposite conclusion.</t>
+        <t>A set can make an individual requirement conditional. The condition and its effect on that requirement are explicit in the set or a referenced profile. The Evaluation Basis identifies the condition and the evidence or stated assumptions used to determine whether it applies. Failure to establish the condition does not establish that the requirement is inapplicable. Whether a requirement applies is distinct from whether an available item satisfies it.</t>
+      </section>
+      <section anchor="evidence-production-expectation">
+        <name>Evidence Production Expectation</name>
+        <t>
+          <strong>Evidence Production Expectation:</strong> An expectation that a specified Evidence Source will produce or make available a specified class of Audit Evidence Items for qualifying events within a stated scope.</t>
+        <t>A production expectation has an identifiable basis, such as a specification, profile, deployment agreement, participant commitment, or operational policy.</t>
+        <t>Where delivery or retention matters, that basis separately identifies the expected producer, the required recipient or holder, the party responsible for delivery or retention, and the relevant deadline or interval. These roles can be held by different parties. The source searched by the auditor can also differ from those parties. A holder does not become the Evidence Source of the original assertion merely by storing the item.</t>
+        <t>Where timing is material, an evaluation distinguishes an expectation that applied during the audited interval from one introduced only during later analysis.</t>
+      </section>
+      <section anchor="evidence-source">
+        <name>Evidence Source</name>
+        <t>
+          <strong>Evidence Source:</strong> The role, component, person, service, or administrative party responsible for the information asserted or observed by an Audit Evidence Item.</t>
+        <t>The Evidence Source is not necessarily the component that transports, stores, serializes, registers, or presents the item.</t>
+        <t>For example, a transparency service can provide evidence that a statement was registered without becoming the source of the statement's assertion about an external event.</t>
+        <t>Where control is material to an Audit Task, the Evaluation Basis identifies who controlled the relevant observation, evidence-production, or disclosure path. Organizational separation alone does not establish independent observation. Conversely, evidence produced at the acting boundary can be subject to an external constraint, anchor, or witness that materially limits unilateral control over its production.</t>
+      </section>
+      <section anchor="observation-boundary">
+        <name>Observation Boundary</name>
+        <t>
+          <strong>Observation Boundary:</strong> A point in a system at which an event, state, input, output, or transition can be observed for audit purposes.</t>
+        <t>Examples include a user-approval interface, an agent-to-tool boundary, a pre-tool hook, a policy decision point, a gateway, an execution mediator, or an external service.</t>
+        <t>An Observation Boundary limits what evidence produced there can directly support. Observation of authorization does not establish execution; observation of invocation does not establish an external effect.</t>
+        <t>An Observation Boundary describes where a fact can be observed. Evidence Source describes who is responsible for the information asserted or observed there.</t>
+        <t>An Observation Boundary is a semantic property of what can be observed at a system boundary. It is not established merely by the presence of a carrier-specific field, record type, extension, or label.</t>
+      </section>
+      <section anchor="evidence-coverage">
+        <name>Evidence Coverage</name>
+        <t>
+          <strong>Evidence Coverage:</strong> The set of events, actors, paths, states, resources, or time intervals that an Evidence Source or mechanism is represented or expected to cover.</t>
+        <t>Declared Evidence Coverage does not by itself establish that the represented coverage was effective throughout the audited interval. It also does not establish that every qualifying event was recorded, that omissions are detectable, or that the observation path could not be bypassed.</t>
+        <t>Evidence Coverage is distinct from Audit Scope.</t>
+      </section>
+      <section anchor="evidence-relation">
+        <name>Evidence Relation</name>
+        <t>
+          <strong>Evidence Relation:</strong> A relationship between Audit Evidence Items, or between an Audit Evidence Item and the subject of an Audit Task, that is relevant to evaluating the task.</t>
+        <t>Examples include correlation, ordering, transaction membership, subject or destination binding, semantic consistency, derivation, delegation lineage, and causation.</t>
+        <t>Establishing one relation does not establish a stronger one. Correlation does not establish derivation; ordering does not establish causation; a common identifier does not establish semantic consistency; and a relation established at one crossing does not automatically establish the same relation across an end-to-end chain. The crossing distinction is illustrated by Sumit Ahuja's example <xref target="AHUJA-CROSSING"/>.</t>
+        <t>A carrier-native reference establishes only the Evidence Relation defined for that reference by the applicable specification, profile, or mapping. Cryptographic protection, co-location in one container, or use of a common identifier does not by itself strengthen that relation.</t>
+      </section>
+      <section anchor="evidence-applicability">
+        <name>Evidence Applicability</name>
+        <t>
+          <strong>Evidence Applicability:</strong> Whether an Audit Evidence Item, or a claimed relation involving it, applies to the subject, actor, destination, resource, time, context, and scope relevant to an Audit Task.</t>
+        <t>Evidence Applicability is distinct from validity and authenticity.</t>
+        <t>An item can verify correctly while referring to a different transaction, destination, authorization interval, policy version, delegation context, or audited event.</t>
+        <t>Where a requirement concerns production, delivery, or retention, applicability is evaluated against the relevant role, destination, and interval. Evidence from the correct producer can support production without establishing delivery to the required recipient or retention by the required holder. The destination of the audited action and the recipient or holder of its evidence are not necessarily the same party. These questions about an item differ from the conditional applicability of a requirement in <xref target="evidence-requirement-set"/>.</t>
+      </section>
+      <section anchor="evidence-verification-result">
+        <name>Evidence Verification Result</name>
+        <t>
+          <strong>Evidence Verification Result:</strong> The result of applying an identified verification procedure to one or more Audit Evidence Items.</t>
+        <t>An Evidence Verification Result reports the checks actually performed, such as schema validation, signature verification, checks of canonical form where required by the applicable specification, hash or chain verification, receipt-to-record binding, transparency inclusion, attestation appraisal, or a profile-defined semantic predicate.</t>
+        <t>A successful Evidence Verification Result does not answer the Audit Task unless the verified properties are sufficient for that task.</t>
+        <t>The result is scoped to the checks actually performed and to their material assumptions and limitations. A negative verification result, an inability to perform a check because required inputs are unavailable, and a successful check of a narrower property are distinct conditions.</t>
+        <t>Where a verification result includes an omission- or completeness-related property, the result also identifies the applicable population or coverage and the party or mechanism by which an omission is detectable.</t>
+      </section>
+      <section anchor="evaluation-basis">
+        <name>Evaluation Basis</name>
+        <t>
+          <strong>Evaluation Basis:</strong> The Audit Evidence Items, Evidence Verification Results, evaluation procedures, applicable specification, profile, or mapping versions, evidence-selection rules, and material assumptions actually used to produce an Audit Evaluation Result.</t>
+        <t>The Evaluation Basis is not necessarily the whole Audit Evidence Set.</t>
+        <t>The Evaluation Basis identifies the applicable Evidence Requirement Set or Sets, including the version or identifiable revision used, and the basis of any production expectation material to the result.</t>
+        <t>Where a result depends on an item not being found, the Evaluation Basis also identifies the declared sources, the query, the search cutoff and its as-of meaning, whether the applicable search completed for each source, and material limitations. A search cutoff is distinct from a deadline for production or delivery, or an interval of required retention.</t>
+        <t>Omitting materially contradictory applicable evidence from the positive support path does not make that evidence irrelevant. Where materially relevant evidence is excluded, the Evaluation Basis identifies the applicable selection or exclusion rule.</t>
+      </section>
+      <section anchor="audit-evaluation-result">
+        <name>Audit Evaluation Result</name>
+        <t>
+          <strong>Audit Evaluation Result:</strong> The result of evaluating an Audit Task against an Evaluation Basis at a stated time.</t>
+        <t>A result can support a positive or negative conclusion, identify insufficient or conflicting evidence, or remain unresolved. This document defines no closed result-code set.</t>
+        <t>An operational state recorded in evidence, such as <tt>pending</tt>, <tt>denied</tt>, or <tt>execution_lost</tt>, is not by itself an Audit Evaluation Result.</t>
+        <t>A result distinguishes evidence satisfying a requirement from an explicit condition making that requirement inapplicable, and from an inability to determine applicability or satisfaction. It identifies the condition, its supporting basis, and which part of the Audit Task has been resolved. Conditional non-applicability is not evidence that an event did not occur.</t>
+        <t>Additional evidence can strengthen, weaken, contradict, or leave unchanged an earlier result. A later result does not imply that an earlier, correctly bounded result was erroneous.</t>
+        <t>When an Audit Evaluation Result is propagated, summarized, or aggregated, its evaluator or source, Audit Task and Audit Scope, evaluation time, and Evaluation Basis (or a stable reference to that basis) remain attributable. Otherwise a bounded result can become an unattributed conclusion as it moves between systems.</t>
+      </section>
+      <section anchor="evidence-availability-states">
+        <name>Availability, Observations, and Evaluation States</name>
+        <t>The following distinctions concern different aspects of an audit. They are not values of one closed result-code set.</t>
+        <t>
+          <em>Expectations and availability.</em>
+        </t>
+        <t>
+          <strong>Expected but Not Found:</strong> An applicable Evidence Production Expectation indicates that an item should have been produced or made available, but no qualifying item was found after completing the applicable search over all declared sources for the declared query and cutoff.</t>
+        <t>
+          <strong>Expected but Search Incomplete:</strong> An applicable Evidence Production Expectation indicates that an item should have been produced or made available, but the item is not available to the auditor and the applicable search is incomplete, for example because a necessary source cannot be checked.</t>
+        <t><strong>Expected but Not Found</strong> supports only a bounded finding about the declared sources, query, and cutoff. <strong>Expected but Search Incomplete</strong> does not support that finding over all declared sources. Neither state, by itself, establishes that the item was never produced or that the underlying event did not occur.</t>
+        <t>
+          <strong>Not Expected:</strong> No applicable Evidence Production Expectation calls for the item from the relevant source or boundary.</t>
+        <t>
+          <strong>Expectation Undetermined:</strong> Available information is insufficient to determine whether an item should have been expected.</t>
+        <t>
+          <em>Content of evidence.</em>
+        </t>
+        <t>
+          <strong>Negative Observation:</strong> An Audit Evidence Item affirmatively records a negative event, state, or result within an applicable Observation Boundary.</t>
+        <t>
+          <em>Evaluation status and conflicts.</em>
+        </t>
+        <t>
+          <strong>Unresolved:</strong> The Evaluation Basis does not support a sufficiently grounded positive or negative conclusion for the Audit Task. An Unresolved result is not a Negative Observation and does not by itself refute the proposition being evaluated.</t>
+        <t>
+          <strong>Conflicting Evidence:</strong> Individually usable Audit Evidence Items support incompatible observations or conclusions relevant to the same Audit Task.</t>
+        <t>Absence of an Audit Evidence Item is not, by itself, a Negative Observation.</t>
+      </section>
+    </section>
+    <section anchor="task-relative-evidence-model">
+      <name>Task-Relative Evidence Model</name>
+      <section anchor="audit-task-and-alternative-evidence-requirements">
+        <name>Audit Task and Alternative Evidence Requirements</name>
+        <t>An Audit Task identifies the question to be answered and its Audit Scope.</t>
+        <t>The task can then be associated with one or more alternative Evidence Requirement Sets.</t>
+        <t>For example, consider:</t>
+        <blockquote>
+          <t>Did operation O produce provider-side effect E?</t>
+        </blockquote>
+        <t>One Evidence Requirement Set can require provider-side evidence that, under its native specification, establishes the relevant effect semantics, together with evidence binding the provider-side outcome to O.</t>
+        <t>Another can require independently obtained provider state that establishes E at the relevant time, together with Evidence Relations and stated assumptions sufficient to attribute that effect to O. A relation between O and the affected resource alone does not establish that O produced E.</t>
+        <t>A domain-specific profile can define another sufficient set.</t>
+        <t>A profile or mapping can specify how a concrete representation satisfies an Evidence Requirement Set. Mapping carrier-native fields, references, or result values into this model does not, by itself, strengthen the semantic property supported by the underlying evidence or Evidence Verification Results.</t>
+        <t>This separation allows different protocols, formats, or deployments to satisfy the same auditing question without requiring a universal record format.</t>
+        <t>It also allows a privacy-aware deployment to prefer a less-disclosing sufficient set when more than one set is available.</t>
+      </section>
+      <section anchor="evidence-requirements-and-production-expectations">
+        <name>Evidence Requirements and Production Expectations</name>
+        <t>Evidence requirements and production expectations answer different questions.</t>
+        <t>An Evidence Requirement Set asks:</t>
+        <blockquote>
+          <t>What evidence is sufficient to evaluate this Audit Task?</t>
+        </blockquote>
+        <t>An Evidence Production Expectation asks:</t>
+        <blockquote>
+          <t>What evidence was this source or mechanism expected to produce?</t>
+        </blockquote>
+        <t>An Evidence Requirement Set can call for provider-side evidence even when the provider does not participate in the auditing system. If that evidence is unavailable and no alternative applicable Evidence Requirement Set can be satisfied from the available evidence, the Audit Task remains <strong>Unresolved</strong>. The unavailability of the provider-side evidence does not, by itself, establish a failure to meet a production expectation.</t>
+        <t>Conversely, a gateway can be expected to produce evidence of its decision for every qualifying request even when that evidence alone is not sufficient to answer the broader Audit Task.</t>
+        <t>Interpreting missing evidence as an unmet production expectation requires an applicable expectation and an identifiable basis. Missing evidence can still limit an Audit Task even when no production expectation applied. These distinctions do not require the auditor to determine why the evidence is unavailable.</t>
+        <t>A carrier's ability to represent a class of information does not, by itself, establish an Evidence Production Expectation. An expectation that a source will produce or disclose that information requires an applicable basis as described in <xref target="evidence-production-expectation"/>.</t>
+      </section>
+      <section anchor="coverage-and-effective-coverage">
+        <name>Coverage and Effective Coverage</name>
+        <t>Evidence Coverage states which event classes, paths, resources, or intervals a source or mechanism is represented or expected to cover.</t>
+        <t>That representation is not proof that coverage actually held throughout the audited interval.</t>
+        <t>Outages, bypass paths, partial deployment, configuration changes, or adversarial control can reduce effective coverage.</t>
+        <t>Collection can also be deliberately limited by instrumentation settings, sampling, filtering, or truncation. Where material to the result, the Evaluation Basis identifies the collection settings applicable during the audited interval and their effects on recording, export, retention, or disclosure. A configuration that limits collection does not, by itself, remove a production, delivery, or retention expectation established on an independent basis.</t>
+        <t>A complete search of a telemetry backend does not establish complete observation or recording of the audited events. Separately stored content can be available even when associated telemetry was not recorded or exported. Conversely, an available telemetry record can refer to content that the auditor cannot obtain.</t>
+        <t>Where an Audit Evaluation Result depends on coverage having been effective, the Evaluation Basis includes either evidence supporting that condition or an explicit assumption identifying it.</t>
+        <t>In particular, a stronger conclusion that an event did not occur generally requires more than a missing record. It can depend on a defined event class and interval, an applicable production expectation, effective coverage, and grounds for believing relevant omissions or bypasses would have been detectable.</t>
+        <t>This document defines no universal completeness or omission-control mechanism.</t>
+      </section>
+      <section anchor="verification-applicability-and-evaluation">
+        <name>Verification, Applicability, and Evaluation</name>
+        <t>Verification establishes the properties checked by a verification procedure.</t>
+        <t>Applicability asks whether the verified item belongs to the audited subject and context.</t>
+        <t>These are separate.</t>
+        <t>A signed authorization record can verify correctly but apply to the wrong recipient. A historical status response can be authentic but outside the interval relevant to an action. A transparency receipt can verify registration of a statement while leaving the truth of the statement unresolved.</t>
+        <t>For each Audit Evidence Item used in an evaluation, the auditor distinguishes its source, where it was produced or observed, and the semantics defined by its originating specification. The Evaluation Basis identifies who controlled the relevant observation or production path where that control is material to the Audit Task. The evaluation also identifies what the item cannot establish on its own.</t>
+        <t>For example, declared model metadata does not by itself establish the model or configuration actually used. A prompt template does not by itself establish the input supplied for a particular invocation.</t>
+        <t>A recorded explanation or output labelled as reasoning does not by itself establish why an agent selected an action. Using such an artifact as evidence does not create an expectation that internal reasoning be produced or disclosed.</t>
+        <t>Authorization evidence and post-action or accountability evidence are also distinct inputs. They can arise at different Observation Boundaries and be supplied by different protocols. The presence, absence, verification result, or value of one does not by itself establish the presence, absence, or value of the other.</t>
+        <t>The auditor therefore identifies an Evaluation Basis containing the evidence, verification results, profiles, selection rules, and assumptions actually used.</t>
+        <t>The Audit Task is resolved only to the extent that this basis satisfies an applicable Evidence Requirement Set.</t>
+      </section>
+      <section anchor="evidence-selection-and-conflicts">
+        <name>Evidence Selection and Conflicts</name>
+        <t>The Audit Evidence Set contains what is available. The Evaluation Basis identifies what is used.</t>
+        <t>This distinction supports reproducibility, but it also creates a selection risk.</t>
+        <t>Suppose the available set contains one provider record supporting a conclusion and another applicable record contradicting it. Selecting the first item and silently excluding the second does not resolve the conflict.</t>
+        <t>The model defines no universal conflict-resolution policy. The Evaluation Basis makes the treatment of materially relevant evidence and the applicable selection rule explicit.</t>
+        <t>Evaluating one candidate basis and discovering whether another sufficient basis exists in the available evidence are separate problems. Failure of one selected Evaluation Basis, or failure to satisfy one Evidence Requirement Set, does not establish that no other sufficient basis exists in the Audit Evidence Set unless the applicable search or selection procedure justifies that conclusion.</t>
+      </section>
+      <section anchor="dependency-structure">
+        <name>Dependency Structure</name>
+        <t>The following figure is a dependency model, not a required processing sequence. It distinguishes specifications, deployments, or commitments that establish production expectations from carrier specifications, profiles, or mappings that interpret concrete representations for verification and applicability.</t>
+        <artwork type="ascii-art"> Audit Task + Audit Scope                Sources + Boundaries
+            |                                    |
+            v                                    v
+ Evidence Requirement Set(s)               Audit Evidence Set
+            |                                    |
+            |                       native specs / mappings
+            |                                    |
+            |                       verification + applicability
+            |                                    |
+            |                                    v
+            |                             Evaluation Basis
+            |                                    |
+            +------------------+-----------------+
+                               |
+                               v
+                    Audit Task Evaluation &lt;-------+
+                               |                  |
+                               v                  |
+                    Audit Evaluation Result       |
+                                                  |
+                  Production Expectations + Coverage
+                               ^
+                               |
+           specifications / deployments / commitments</artwork>
+        <t>The Evaluation Basis also identifies applicable mapping versions, assumptions, and evidence-selection rules. The arrows describe inputs to evaluation, not a required execution order.</t>
+      </section>
+    </section>
+    <section anchor="representative-examples">
+      <name>Representative Examples</name>
+      <section anchor="authorized-invoked-or-effected">
+        <name>Authorization, Invocation, and Effect</name>
+        <t>A user asks an agent to refund USD 100.</t>
+        <t>The available evidence can include a user approval, an authorization or delegation record, an agent-side tool invocation, a gateway dispatch record, and a provider-side effect record.</t>
+        <t>Consider three Audit Tasks.</t>
+        <t>
+          <strong>Was the refund authorized?</strong> One Evidence Requirement Set can require applicable user approval and authorization evidence.</t>
+        <t>
+          <strong>Was the refund invoked?</strong> Authorization evidence is insufficient. Applicable evidence from a boundary capable of observing the invocation is required by that Audit Task.</t>
+        <t>
+          <strong>Did the refund take effect?</strong> Invocation evidence is insufficient. One Evidence Requirement Set can require a provider-side outcome whose originating specification establishes the relevant effect semantics, together with evidence binding that outcome to the audited refund. Another can use independently obtained provider state that establishes the refund effect, together with Evidence Relations and stated assumptions sufficient to attribute that effect to the audited refund at the relevant time.</t>
+        <t>The same Audit Evidence Set can therefore be sufficient for one task and insufficient for another.</t>
+        <t>A successful signature or chain verification of the invocation record does not change which question that record can answer.</t>
+      </section>
+      <section anchor="expected-evidence-across-administrative-domains">
+        <name>Expected Evidence Across Administrative Domains</name>
+        <t>Consider:</t>
+        <artwork type="ascii-art">User -&gt; Agent -&gt; Gateway -&gt; External Service</artwork>
+        <t>The Audit Task is:</t>
+        <blockquote>
+          <t>Can the auditor reconstruct whether request R was admitted by the Gateway and then observed by the External Service?</t>
+        </blockquote>
+        <t>One Evidence Requirement Set calls for:</t>
+        <ul>
+          <li>
+            <t>an Agent-side invocation record;</t>
+          </li>
+          <li>
+            <t>a Gateway-side admission or decision record;</t>
+          </li>
+          <li>
+            <t>a Service-side observation;</t>
+          </li>
+          <li>
+            <t>and relations sufficient to bind the records to R, distinguish attempts where material, and establish the ordering required by the Audit Task.</t>
+          </li>
+        </ul>
+        <t>Suppose the Agent and Service records are available but the Gateway record is not.</t>
+        <t>If the applicable deployment profile established that the Gateway produces a decision record for every qualifying request, the record is expected. If the applicable search over all declared sources for the declared query and cutoff is complete and no qualifying Gateway record was found, the state is <strong>Expected but Not Found</strong>. If the search is incomplete, the state is <strong>Expected but Search Incomplete</strong>. These are findings about the evidence set and the search. Neither establishes that no Gateway decision occurred.</t>
+        <t>If no applicable specification, profile, agreement, commitment, or policy called for a Gateway record for R, that record was <strong>Not Expected</strong>. Non-participation in a particular audit mechanism does not, by itself, establish that no production expectation applied. The available evidence can still be insufficient for the full Audit Task.</t>
+        <t>If the available information does not establish whether an Evidence Production Expectation applied to R, the state is <strong>Expectation Undetermined</strong>. Uncertainty about effective coverage does not, by itself, make a known production expectation undetermined.</t>
+        <t>A further case illustrates <strong>Expected but Search Incomplete</strong> under the applicable production expectation. Suppose the gateway slot is empty, one declared source has been searched completely, and another declared source is unavailable. The auditor can report that no qualifying record was found in the first source for the declared query and cutoff. The cross-source audit remains incomplete or Unresolved; it does not support a bounded-absence finding over all declared sources. A bounded-absence finding requires the applicable search to be complete over all declared sources for the declared query and cutoff. This distinction follows the proposed conformance cases in <xref target="IMAN-CASES"/>.</t>
+        <t>This example shows why evidence requirements, production expectations, and coverage cannot be collapsed into one concept.</t>
+      </section>
+      <section anchor="historical-authorization-state">
+        <name>Historical Authorization State</name>
+        <t>A user grants Agent A authority to spend up to one thousand US dollars. Agent A delegates limited authority to Agent B. The authority is later narrowed or revoked, and Agent B performs a USD 500 action near the transition.</t>
+        <t>At audit time, the current authorization state is negative.</t>
+        <t>The Audit Task is:</t>
+        <blockquote>
+          <t>Was the action within the authority applicable when it was admitted?</t>
+        </blockquote>
+        <t>An Evidence Requirement Set can require evidence of the historical authorization context, including the applicable status input, whether the status answer met the freshness conditions applicable at admission time, and the relation between that information and the admission decision. The Evaluation Basis identifies the evidence and material assumptions actually used to evaluate that requirement.</t>
+        <t>A negative state observed at audit time does not establish the historical state. Identifying a status source that was consulted does not establish that its answer met the freshness conditions applicable at admission time. Failure to obtain such an answer is not the same fact as a negative authorization result. A record of admission does not by itself establish that the authorization state used was sufficiently current at admission time.</t>
+        <t>If the applicable historical state cannot be reconstructed, the correct Audit Evaluation Result can remain <strong>Unresolved</strong>.</t>
+      </section>
+      <section anchor="illustrative-refund-evaluation">
+        <name>Illustrative Refund Evaluation</name>
+        <t>This fictional example illustrates a positive result under explicit assumptions. It is not a report of executed checks or an interoperability test. The labels P-R1, E1, E2, R, T, and t0 are local to the example, not standardized fields.</t>
+        <t>Consider the Audit Task: "Did provider P apply refund R of USD 100 to transaction T in its ledger before time t0?" The Audit Scope is that ledger operation, not downstream settlement or the user's original authorization.</t>
+        <t>For this example only, an illustrative profile P-R1 defines a provider confirmation as an assertion that the identified refund was applied to the identified transaction in the provider's ledger. The profile identifies the amount, currency, and time asserted for that operation. P-R1 is not an existing protocol specification, and its semantics are not attributed to another document.</t>
+        <t>One Evidence Requirement Set calls for a confirmation matching P, R, T, the amount and currency, together with verification of its provider origin and integrity, an applicable interpretation under P-R1, and a basis for using its asserted time. Satisfaction of this set depends on the stated assumptions about the provider's reporting and clock.</t>
+        <t>Suppose the Audit Evidence Set contains E1, a signed provider confirmation asserting that the operation was applied before t0, and E2, the applicable version of P-R1 obtained from an identified configuration source. The auditor also has the trust configuration needed to verify P's signing identity. Assume for illustration that the signature and identity checks succeed, that the material values match the Audit Task, and that the asserted time and permitted clock error place the operation before t0.</t>
+        <t>The Evaluation Basis identifies E1, E2, the trust configuration, the checks performed, and the assumptions that P reported its ledger state accurately and that the stated clock bound held. No materially contradictory applicable item is available in this example; that condition does not assert that all possible sources have been searched. No finding about an unmet production expectation is made.</t>
+        <t>Under those assumptions, the result supports the conclusion that P applied the specified refund in its ledger before t0. It does not establish independent observation of the ledger, completion of downstream settlement, or authorization of the original refund request. Each of those questions can require a different Evidence Requirement Set.</t>
+      </section>
+    </section>
+    <section anchor="potential-uses-in-audit-work">
+      <name>Potential Uses in AUDIT Work</name>
+      <t>This section describes ways in which the model can support possible future AUDIT work. It does not assume a particular charter outcome or document structure.</t>
+      <section anchor="requirements-and-data-model-review">
+        <name>Requirements and Data-Model Review</name>
+        <t>A use case can be reduced to explicit questions:</t>
+        <ul>
+          <li>
+            <t>What is the Audit Task and Audit Scope?</t>
+          </li>
+          <li>
+            <t>Which alternative Evidence Requirement Sets are sufficient?</t>
+          </li>
+          <li>
+            <t>Which sources are expected to produce which information?</t>
+          </li>
+          <li>
+            <t>Which Observation Boundaries matter?</t>
+          </li>
+          <li>
+            <t>What Evidence Coverage is represented?</t>
+          </li>
+          <li>
+            <t>Which Evidence Relations are required?</t>
+          </li>
+          <li>
+            <t>What does each relevant record mean, who asserts or observes it, and what does it not establish by itself?</t>
+          </li>
+          <li>
+            <t>For each referenced verification procedure, what does a successful result establish, what assumptions does it rely on, and what remains outside its reach?</t>
+          </li>
+          <li>
+            <t>Where control matters, who controlled the observation, production, or disclosure path?</t>
+          </li>
+          <li>
+            <t>Which assumptions remain deployment-specific?</t>
+          </li>
+        </ul>
+        <t>These questions separate semantic requirements from a candidate record format and help prevent a carrier or a successful verification result from silently acquiring stronger semantics in a particular deployment.</t>
+      </section>
+      <section anchor="comparing-candidate-mechanisms-and-mappings">
+        <name>Comparing Candidate Mechanisms and Mappings</name>
+        <t>Candidate mechanisms can be compared by asking which Audit Tasks they help evaluate, which Evidence Requirement Sets they can satisfy, which sources and boundaries they distinguish, which relations they represent, and which properties remain deployment assumptions.</t>
+        <t>A format-specific mapping can explain how the objects, fields, references, extensions, and verification procedures defined for that format support the semantic properties used by this model. Such mappings are outside the core terminology and can differ between carriers.</t>
+        <t>Two mechanisms can therefore support the same Audit Task through different evidence combinations. Different carriers can satisfy the same Evidence Requirement Set when their respective mappings establish the required semantic properties to the same stated extent.</t>
+      </section>
+      <section anchor="collection-and-query-interfaces">
+        <name>Collection and Query Interfaces</name>
+        <t>The model can provide requirements input to future collection or Audit Store interfaces.</t>
+        <t>An auditor can require evidence from identified sources, for a specified interval and event class, with specified relations and, where necessary, identified record or profile forms.</t>
+        <t>This document does not define how such a request is encoded or transmitted.</t>
+      </section>
+      <section anchor="interoperability-and-conformance-reports">
+        <name>Interoperability and Conformance Reports</name>
+        <t>The model can help bound claims made from implementation and interoperability results.</t>
+        <t>An interoperability report can identify:</t>
+        <ul>
+          <li>
+            <t>the Audit Task or property being tested;</t>
+          </li>
+          <li>
+            <t>the evidence and vectors used;</t>
+          </li>
+          <li>
+            <t>the applicable carrier mapping or profile version, where one is involved;</t>
+          </li>
+          <li>
+            <t>verification procedures and specification versions;</t>
+          </li>
+          <li>
+            <t>the semantic property established by those procedures;</t>
+          </li>
+          <li>
+            <t>assumptions and untested stages;</t>
+          </li>
+          <li>
+            <t>and the resulting conclusion and its limitations.</t>
+          </li>
+        </ul>
+        <t>Successful parsing, schema validation, or verification of the same carrier is not sufficient evidence of semantic interoperability if implementations disagree about the Evidence Source, Observation Boundary, Evidence Relation, Evidence Applicability, or property established by verification.</t>
+        <t>The following is illustrative report wording, not a result of testing performed for this document:</t>
+        <blockquote>
+          <t>For the identified test records and profile version, both implementations verified the signatures and matched the records to the same request. Attribution of a provider-side effect to that request was not tested.</t>
+        </blockquote>
+        <t>Such a report limits its claim to the identified checks rather than asserting whole-system conformance.</t>
+      </section>
+      <section anchor="privacy-and-data-minimization">
+        <name>Privacy and Data Minimization</name>
+        <t>Where several Evidence Requirement Sets can satisfy the same Audit Task, a deployment can prefer a set requiring less disclosure.</t>
+        <t>Task-relative requirements can therefore support minimization without requiring one universal selective-disclosure mechanism.</t>
+      </section>
+    </section>
+    <section anchor="relationship-to-other-work">
+      <name>Relationship to Other Work</name>
+      <section anchor="audit-architecture">
+        <name>AUDIT Architecture</name>
+        <t>The architecture described in <xref target="AUDIT-ARCH"/> identifies roles, audit record classes, audit context propagation, and supporting services. The model in this document can support the Auditor's evaluation by making the auditing question, evidence requirements, production expectations, and Evaluation Basis explicit. It does not introduce an additional architectural role or replace the architecture's record classes. References to an evaluator describe the evaluation function, not an additional role.</t>
+        <t>Interaction, Action, Delegation, and Authorization Transition Records can be considered as Audit Evidence Items, together with receipts, Attestation Results, disclosed portions of records, and other relevant observations. The required combination depends on the Audit Task; this model does not require every record class for every task.</t>
+        <t>Audit context can provide identifiers and references used when evaluating Evidence Relations. Audit Scope identifies what is being evaluated. A common identifier does not by itself establish derivation, causation, semantic consistency, or sufficient evidence for the Audit Task. The semantics of each record and reference remain those defined by the applicable specification or profile.</t>
+      </section>
+      <section anchor="rats">
+        <name>RATS</name>
+        <t>The RATS architecture defines roles and terminology for generating and appraising attestation Evidence and Attestation Results <xref target="RFC9334"/>.</t>
+        <t>A RATS Evidence artifact or Attestation Result can be an Audit Evidence Item in this document. This document does not redefine RATS Evidence or appraisal semantics.</t>
+        <t>A successful attestation appraisal does not, by itself, extend the Observation Boundary to an application-level event that the supporting evidence neither observed nor bound.</t>
+      </section>
+      <section anchor="scitt">
+        <name>SCITT</name>
+        <t>The Supply Chain Integrity, Transparency, and Trust (SCITT) architecture describes registration of Signed Statements with Transparency Services and the use of Receipts <xref target="RFC9943"/>.</t>
+        <t>A SCITT Receipt can contribute evidence about registration and transparency-related properties. Registration does not by itself establish the truth of the registered statement or completeness of all statements relevant to an Audit Task, and it does not substitute for independent observation or an independently constrained production path where those properties matter to the Audit Task.</t>
+      </section>
+      <section anchor="effect-boundary-processing">
+        <name>Effect-Boundary Processing</name>
+        <t>The Action Evidence Boundary (AEB) defines an executor-side processing model for consequential effects, including native artifact verification, exact-action binding, authorization, provider entry, outcome handling, and reconciliation <xref target="AEB"/>.</t>
+        <t>This document does not redefine AEB decisions, lifecycle states, provider-entry semantics, reconciliation rules, or deployment claims. When an AEB result or record is used as an Audit Evidence Item, AEB remains authoritative for what that native result establishes and does not establish. This document describes only how that bounded native result participates in a cross-domain Audit Task.</t>
+        <t>An AEB evidence requirement used for admission is therefore distinct from an Evidence Requirement Set used here to evaluate an Audit Task.</t>
+        <t>Other native boundary records can participate in the same way without this document redefining their native semantics.</t>
+      </section>
+      <section anchor="decision-time-evidence-composition">
+        <name>Decision-Time Evidence Composition</name>
+        <t>Authorization Evidence Chains (EP-AEC) defines a relying-party-controlled evidence requirement for a material action and records the basis of its evaluation <xref target="EP-AEC"/>.</t>
+        <t>That decision-time contract is distinct from the auditor-side Evidence Requirement Set in this document. An Audit Task can consider records and results from multiple participants after the fact. This document does not redefine EP-AEC verification, acceptance, material-action matching, requirement satisfaction, or replay semantics, and it defines no replacement composition object.</t>
+      </section>
+      <section anchor="execution-evidence-appraisal">
+        <name>Execution-Evidence Appraisal</name>
+        <t>
+          <tt>draft-sergeev-claim-boundaries-02</tt> describes analytic limits on what execution-related evidence can establish <xref target="CBEE"/>. <tt>draft-sergeev-wexp-core-01</tt> defines carrier-neutral per-action appraisal semantics for execution evidence <xref target="WEXP"/>.</t>
+        <t>This document addresses a different layer: which evidence combinations are needed or available for a particular Audit Task, what sources were expected to produce them, and what Evaluation Basis was used. It does not define execution claim levels, appraisal verdicts, or evidence-strength rankings.</t>
+      </section>
+      <section anchor="expected-record-declarations">
+        <name>Expected-Record Declarations</name>
+        <t>Expected-record declarations can state which participants are expected to produce or make available particular records. An applicable declaration can provide a basis for an Evidence Production Expectation. The availability cases discussed in <xref target="IMAN-CASES"/> and the recipient-or-holder and refusal cases in <xref target="a-7-produced-record-required-recipient-or-holder"/> and <xref target="a-8-declined-action-and-conditional-effect-evidence"/> illustrate questions that such declarations can address.</t>
+        <t>Whether the available records are sufficient for an Audit Task is a separate question governed by its Evidence Requirement Sets and Evaluation Basis. This document does not define a declaration mechanism or prescribe the contents of a separate expected-record specification.</t>
+      </section>
+      <section anchor="opentelemetry-genai">
+        <name>OpenTelemetry GenAI Semantic Conventions</name>
+        <t>OpenTelemetry GenAI semantic conventions describe spans, events, and metrics for model, agent, and tool operations <xref target="OTEL-GENAI"/>. Such telemetry can be considered as Audit Evidence Items under the applicable instrumentation and deployment assumptions. It can be sufficient for some Audit Tasks; this model neither requires nor excludes a particular telemetry format.</t>
+        <t>A mapping identifies the conventions and instrumentation versions, observation points, and collection settings relevant to the Audit Task. The Evaluation Basis identifies the mapping used. Span relationships and operation results retain their originating semantics. A logical-operation span can include retries and is not necessarily evidence of one attempt. Its presence or successful status does not, by itself, establish authorization, a provider-side effect, or collection completeness.</t>
+        <t>The "<tt>gen_ai.evaluation.result</tt>" event describes an evaluation of GenAI output characteristics. It is not automatically an Audit Evaluation Result as defined here. Its use depends on the question being evaluated, the evaluation method, and the evidence requirements that apply. Content-capture and external-storage settings also affect which items are available; absence of a span does not establish absence of separately stored content.</t>
+      </section>
+    </section>
+    <section anchor="security-considerations">
+      <name>Security Considerations</name>
+      <t>This document defines no wire protocol, but an evaluator or producer can manipulate how the model is applied.</t>
+      <t>The threats considered here include false assertions by an Evidence Source, selective withholding by a holder, and misrepresentation of checks, searches, or conclusions by an auditor. These parties can be under common control or act in collusion. The model makes the basis of a result explicit; it does not establish that a reported procedure was performed correctly. Where a conclusion depends on a party's correct behavior, the Evaluation Basis identifies the supporting evidence or material assumption. The SCITT threat model also considers malicious or compromised issuers, services, and auditors (see <xref target="RFC9943" section="9.7" sectionFormat="of"/>).</t>
+      <section anchor="post-hoc-task-or-expectation-manipulation">
+        <name>Post-Hoc Task or Expectation Manipulation</name>
+        <t>Changing the Audit Scope after examining the available evidence can create a misleading appearance of sufficiency.</t>
+        <t>Likewise, an evaluator can make a missing record appear significant by declaring a production expectation only after discovering that the record is absent.</t>
+        <t>An Audit Task can legitimately be defined after the audited events. Where timing is material, the Evaluation Basis distinguishes the time the task and scope were selected from the interval in which a production expectation applied. A later analytical requirement does not retrospectively create a participant obligation to have produced evidence.</t>
+        <t>Changes to an Evidence Requirement Set, its applicability conditions, or material assumptions can also change the result. A later evaluation identifies those changes and preserves the basis of the earlier result rather than silently applying the revised conditions to it.</t>
+      </section>
+      <section anchor="evidence-selection">
+        <name>Evidence Selection</name>
+        <t>An evaluator can select only evidence supporting a preferred conclusion while ignoring applicable contradictory evidence.</t>
+        <t>Material applicable evidence should not be silently excluded. Where an exclusion can materially affect the result, the Evaluation Basis preserves the selection or exclusion rule.</t>
+      </section>
+      <section anchor="coverage-and-binding-errors">
+        <name>Coverage and Binding Errors</name>
+        <t>A source can claim coverage that was not effective because of outages, bypass paths, partial deployment, configuration changes, or adversarial control.</t>
+        <t>An authentic artifact can also be presented for the wrong transaction, destination, resource, actor, or delegation context.</t>
+        <t>Neither declared coverage nor successful artifact verification resolves these problems by itself.</t>
+      </section>
+      <section anchor="version-and-semantic-substitution">
+        <name>Version and Semantic Substitution</name>
+        <t>Evidence can be interpreted differently under different versions of schemas, profiles, policies, or verification procedures.</t>
+        <t>The Evaluation Basis identifies the versions material to the result. A current profile should not silently replace the semantics applicable to historical evidence.</t>
+        <t>Where an Evaluation Basis is referenced, the reference and associated metadata identify the version used. A stable locator alone does not protect that version or the result against substitution. When results or their bases are stored or conveyed, their integrity and binding to the Audit Task, Audit Scope, and evaluation time depend on the applicable mechanism. Use of a result in a different context calls for a separate assessment of its applicability. This document specifies no result-protection format. Related protection concerns for RATS conceptual messages are discussed in <xref target="RFC9334" section="12.2" sectionFormat="of"/>; the model here does not define such a message.</t>
+      </section>
+      <section anchor="adversarial-evidence-content">
+        <name>Adversarial Evidence Content</name>
+        <t>Audit Evidence Items can contain instructions, active content, or attacker-controlled references. Successful verification does not, by itself, authorize execution of that content or make it an instruction to the auditor. Automated evaluation can be subverted if evidence content is allowed to change the instructions, requirements, or policies controlling the evaluation. Safe parsing, rendering, and retrieval are responsibilities of the applicable implementation; this model defines no mechanism for isolating untrusted content. Related concerns for agent conversation records are discussed in <xref target="VACR" section="6.4" sectionFormat="of"/>.</t>
+      </section>
+      <section anchor="authentic-but-untruthful-evidence">
+        <name>Authentic but Untruthful Evidence</name>
+        <t>A valid signature establishes properties of the signed artifact and signer relationship. It does not establish that the signed factual assertion is true.</t>
+        <t>Similarly, the ability of an independent party to verify an artifact does not establish that its production or observation was independent of the audited subject.</t>
+        <t>Independence from later cooperation is also distinct from independence of evidence production. A record created by the acting party and left in place can be evaluable later without that party's cooperation while still remaining only that party's account of itself. Conversely, evidence produced at the acting boundary can have a different control property when an external constraint, anchor, or witness prevents unilateral substitution or suppression.</t>
+      </section>
+    </section>
+    <section anchor="privacy-considerations">
+      <name>Privacy Considerations</name>
+      <t>Audit information can contain user content, identifiers, authorization state, workflow structure, business-sensitive information, and cross-domain correlation data.</t>
+      <t>Task-relative requirements can support minimization by making explicit what evidence is needed for a specific Audit Task. Where multiple Evidence Requirement Sets can satisfy the task, a deployment can prefer one that reveals less information.</t>
+      <t>Selective disclosure can cause different auditors to possess different Audit Evidence Sets. Different bounded results are not necessarily inconsistent when their Evaluation Bases differ.</t>
+      <t>Whether information was communicated to interaction participants is distinct from whether an Evidence Source observed it, whether it was recorded, and whether it is available to an auditor. Information not communicated to participants can still be available as audit evidence, and information communicated to them can be absent from an auditor's Audit Evidence Set. Neither participant visibility nor auditor availability establishes collection completeness.</t>
+      <t>An Audit Task description can itself reveal sensitive metadata, including which participants are expected in a workflow, which events are considered consequential, which observation points exist, and which relationships an auditor is attempting to reconstruct.</t>
+      <t>Confidentiality and disclosure controls can therefore apply not only to Audit Evidence Items but also to task descriptions and production expectations.</t>
+      <t>An Audit Task or Evidence Requirement Set does not grant authority to collect, retain, or disclose information. Applicable access and disclosure controls remain separate. Records, identifiers, and results that are limited for one task can enable broader correlation when combined across tasks or auditors. Hash-based references do not by themselves provide confidentiality (see <xref target="RFC6920" section="10" sectionFormat="of"/>). A deployment's privacy analysis therefore considers the audience, retention period, and cross-task linkability of task metadata and evidence, as well as the amount disclosed for one task. The risk that monitoring itself can be misused is discussed in <xref target="RFC7258"/>.</t>
+      <t>This document defines no privacy-preserving encoding.</t>
+    </section>
+    <section anchor="open-questions">
+      <name>Open Questions</name>
+      <t>The following questions are intentionally left open:</t>
+      <ol>
+        <li>
+          <t>Which task and production-expectation information belongs in architecture, data-model profiles, operational profiles, or deployments?</t>
+        </li>
+        <li>
+          <t>Should any part of an Audit Task or Evidence Production Expectation be machine-readable?</t>
+        </li>
+        <li>
+          <t>Which Evidence Relation and Evidence Coverage semantics require interoperable representation, and which concrete encodings belong in carrier-specific profiles or mappings?</t>
+        </li>
+        <li>
+          <t>How should auditors request or discover evidence needed for an Audit Task?</t>
+        </li>
+        <li>
+          <t>How should verification procedures report the exact properties they established?</t>
+        </li>
+        <li>
+          <t>What information is necessary to make an Audit Evaluation Result reproducible while minimizing disclosure?</t>
+        </li>
+        <li>
+          <t>What mapping information needs to be preserved in the Evaluation Basis so that carrier-specific evidence can be interpreted and independently reproduced by another implementation?</t>
+        </li>
+      </ol>
+    </section>
+    <section anchor="iana-considerations">
+      <name>IANA Considerations</name>
+      <t>This document has no IANA actions.</t>
+    </section>
+  </middle>
+  <back>
+    <references>
+      <name>Informative References</name>
+      <reference anchor="AHUJA-CROSSING" target="https://mailarchive.ietf.org/arch/msg/agent2agent/vA0cS6dOTEMSFL7Qo0ZXWTczRpU/">
+        <front>
+          <title>[agent2agent] Re: New I-D : A Dimensional Model for Characterizing AI Agent Protocol Proposals and Their Substrates</title>
+          <author initials="S. P." surname="Ahuja" fullname="Sumit P. Ahuja"/>
+          <date day="1" month="October" year="2026"/>
+        </front>
+      </reference>
+      <reference anchor="AUDIT-ARCH" target="https://datatracker.ietf.org/doc/draft-kuehlewind-audit-architecture/01/">
+        <front>
+          <title>An Architecture for Auditing Agent Delegation and Interactions</title>
+          <author initials="M." surname="Kuehlewind" fullname="Mirja Kühlewind" asciiFullname="Mirja Kuehlewind" asciiSurname="Kuehlewind"/>
+          <author initials="H." surname="Birkholz" fullname="Henk Birkholz"/>
+          <date day="7" month="September" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-kuehlewind-audit-architecture-01"/>
+      </reference>
+      <reference anchor="AEB" target="https://datatracker.ietf.org/doc/draft-schrock-action-evidence-boundary/07/">
+        <front>
+          <title>The Action Evidence Boundary for Consequential Agent Effects</title>
+          <author initials="I." surname="Schrock" fullname="Iman Schrock"/>
+          <date day="25" month="September" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-schrock-action-evidence-boundary-07"/>
+      </reference>
+      <reference anchor="CBEE" target="https://datatracker.ietf.org/doc/draft-sergeev-claim-boundaries/02/">
+        <front>
+          <title>Claim Boundaries for Execution Evidence</title>
+          <author initials="M." surname="Sergeev" fullname="Mikhail Sergeev"/>
+          <date day="15" month="October" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-sergeev-claim-boundaries-02"/>
+      </reference>
+      <reference anchor="WEXP" target="https://datatracker.ietf.org/doc/draft-sergeev-wexp-core/01/">
+        <front>
+          <title>The Witnessed Execution Protocol (WEXP): Core Specification</title>
+          <author initials="M." surname="Sergeev" fullname="Mikhail Sergeev" role="editor"/>
+          <author initials="V." surname="Ikher" fullname="Vladimir Ikher"/>
+          <date day="14" month="August" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-sergeev-wexp-core-01"/>
+      </reference>
+      <reference anchor="RFC9334" target="https://www.rfc-editor.org/info/rfc9334">
+        <front>
+          <title>Remote ATtestation procedureS (RATS) Architecture</title>
+          <author initials="H." surname="Birkholz" fullname="Henk Birkholz"/>
+          <author initials="D." surname="Thaler" fullname="Dave Thaler"/>
+          <author initials="M." surname="Richardson" fullname="Michael Richardson"/>
+          <author initials="N." surname="Smith" fullname="Ned Smith"/>
+          <author initials="W." surname="Pan" fullname="Wei Pan"/>
+          <date month="January" year="2023"/>
+        </front>
+        <seriesInfo name="RFC" value="9334"/>
+        <seriesInfo name="DOI" value="10.17487/RFC9334"/>
+      </reference>
+      <reference anchor="RFC9943" target="https://www.rfc-editor.org/info/rfc9943">
+        <front>
+          <title>An Architecture for Trustworthy and Transparent Digital Supply Chains</title>
+          <author initials="H." surname="Birkholz" fullname="Henk Birkholz"/>
+          <author initials="A." surname="Delignat-Lavaud" fullname="Antoine Delignat-Lavaud"/>
+          <author initials="C." surname="Fournet" fullname="Cédric Fournet" asciiFullname="Cedric Fournet" asciiSurname="Fournet"/>
+          <author initials="Y." surname="Deshpande" fullname="Yogesh Deshpande"/>
+          <author initials="S." surname="Lasker" fullname="Steve Lasker"/>
+          <date month="June" year="2026"/>
+        </front>
+        <seriesInfo name="RFC" value="9943"/>
+        <seriesInfo name="DOI" value="10.17487/RFC9943"/>
+      </reference>
+      <reference anchor="EP-AEC" target="https://datatracker.ietf.org/doc/html/draft-schrock-ep-authorization-evidence-chain-08">
+        <front>
+          <title>Authorization Evidence Chains: Composing Heterogeneous Agent-Action Evidence (EP-AEC)</title>
+          <author initials="I." surname="Schrock" fullname="Iman Schrock"/>
+          <date day="4" month="October" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-schrock-ep-authorization-evidence-chain-08"/>
+      </reference>
+      <reference anchor="IMAN-CASES" target="https://mailarchive.ietf.org/arch/msg/audit/u04Utry2tPGRqJ_f-SmRk_EMW88">
+        <front>
+          <title>Re: Charter Comments -- more specific on the scope?</title>
+          <author initials="I." surname="Schrock" fullname="Iman Schrock"/>
+          <date day="6" month="October" year="2026"/>
+        </front>
+        <refcontent>AUDIT mailing list, proposed conformance cases</refcontent>
+      </reference>
+      <reference anchor="WADKINS" target="https://datatracker.ietf.org/doc/draft-wadkins-agentproto-action-determinability/">
+        <front>
+          <title>Independent Determinability of Agent Actions</title>
+          <author initials="D." surname="Wadkins" fullname="Douglas Wadkins"/>
+          <date day="10" month="September" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-wadkins-agentproto-action-determinability-00"/>
+      </reference>
+      <reference anchor="MORETTO-RECIPIENT" target="https://mailarchive.ietf.org/arch/msg/audit/XVTaQ0mqjOt4YHjGjpJPUye3vCY">
+        <front>
+          <title>[Audit] Re: Charter Comments -- more specific on the scope?</title>
+          <author initials="F." surname="Marinoni Moretto" fullname="Francesco Marinoni Moretto"/>
+          <date day="7" month="October" year="2026"/>
+        </front>
+        <refcontent>AUDIT mailing list, wrong-recipient-or-holder case</refcontent>
+      </reference>
+      <reference anchor="SIRKKAVAARA-REFUSAL" target="https://mailarchive.ietf.org/arch/msg/audit/xCNd0SiPlas7ROG5mNLCpYveP8U">
+        <front>
+          <title>[Audit] Re: Charter Comments -- more specific on the scope?</title>
+          <author initials="H." surname="Sirkkavaara" fullname="Henri Sirkkavaara"/>
+          <date day="7" month="October" year="2026"/>
+        </front>
+        <refcontent>AUDIT mailing list, declined-action case</refcontent>
+      </reference>
+      <reference anchor="SCHROCK-REFUSAL" target="https://mailarchive.ietf.org/arch/msg/audit/p_gA6xAzlBBK3DIMl0SFszYUnmE">
+        <front>
+          <title>[Audit] Re: Charter Comments -- more specific on the scope?</title>
+          <author initials="I." surname="Schrock" fullname="Iman Schrock"/>
+          <date day="8" month="October" year="2026"/>
+        </front>
+        <refcontent>AUDIT mailing list, decision and conditional effect evidence</refcontent>
+      </reference>
+      <reference anchor="VACR" target="https://datatracker.ietf.org/doc/html/draft-birkholz-verifiable-agent-conversations-01">
+        <front>
+          <title>Verifiable Agent Conversation Records</title>
+          <author initials="H." surname="Birkholz" fullname="Henk Birkholz"/>
+          <author initials="T." surname="Heldt" fullname="Tobias Heldt"/>
+          <author initials="O." surname="Steele" fullname="Orie Steele"/>
+          <date day="31" month="August" year="2026"/>
+        </front>
+        <seriesInfo name="Internet-Draft" value="draft-birkholz-verifiable-agent-conversations-01"/>
+      </reference>
+      <reference anchor="RFC6920" target="https://www.rfc-editor.org/info/rfc6920">
+        <front>
+          <title>Naming Things with Hashes</title>
+          <author initials="S." surname="Farrell" fullname="Stephen Farrell"/>
+          <author initials="D." surname="Kutscher" fullname="Dirk Kutscher"/>
+          <author initials="C." surname="Dannewitz" fullname="Christian Dannewitz"/>
+          <author initials="B." surname="Ohlman" fullname="Borje Ohlman"/>
+          <author initials="A." surname="Keranen" fullname="Ari Keranen"/>
+          <author initials="P." surname="Hallam-Baker" fullname="Phillip Hallam-Baker"/>
+          <date month="April" year="2013"/>
+        </front>
+        <seriesInfo name="RFC" value="6920"/>
+        <seriesInfo name="DOI" value="10.17487/RFC6920"/>
+      </reference>
+      <reference anchor="RFC7258" target="https://www.rfc-editor.org/info/rfc7258">
+        <front>
+          <title>Pervasive Monitoring Is an Attack</title>
+          <author initials="S." surname="Farrell" fullname="Stephen Farrell"/>
+          <author initials="H." surname="Tschofenig" fullname="Hannes Tschofenig"/>
+          <date month="May" year="2014"/>
+        </front>
+        <seriesInfo name="BCP" value="188"/>
+        <seriesInfo name="RFC" value="7258"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7258"/>
+      </reference>
+      <reference anchor="OTEL-GENAI" target="https://github.com/open-telemetry/semantic-conventions-genai/tree/f3c6d0c9bb66ebd474668a3a0be25c61226f02c2">
+        <front>
+          <title>OpenTelemetry GenAI Semantic Conventions</title>
+          <author><organization>OpenTelemetry</organization></author>
+          <date day="14" month="October" year="2026"/>
+        </front>
+        <refcontent>Development snapshot, commit f3c6d0c9bb66ebd474668a3a0be25c61226f02c2</refcontent>
+      </reference>
+    </references>
+    <section anchor="additional-cases">
+      <name>Additional Cases</name>
+      <section anchor="a-1-missing-record-or-negative-event">
+        <name>Missing Record or Negative Event?</name>
+        <t>An observation mechanism is represented as recording every qualifying call. The auditor receives records <tt>101, 102, 104, 105</tt>.</t>
+        <t>Record <tt>103</tt> is absent.</t>
+        <t>The absence can reflect loss, nondisclosure, record-production failure, an uncovered path, non-participation, or no underlying event.</t>
+        <t>The interpretation depends on the production expectation, Evidence Coverage, Audit Scope, and assumptions about gap detection and bypassability.</t>
+        <t>
+          <tt>Record not found</tt> is not equivalent to <tt>event did not occur</tt>.</t>
+      </section>
+      <section anchor="a-2-locally-valid-records-globally-inconsistent-wo">
+        <name>Locally Valid Records, Globally Inconsistent Workflow</name>
+        <t>An Inventory service records reservation of item A. A Payment service records a charge for item B.</t>
+        <t>Both records are authentic and carry the same high-level workflow identifier.</t>
+        <t>The Audit Task:</t>
+        <blockquote>
+          <t>Did the distributed workflow execute the intended purchase consistently?</t>
+        </blockquote>
+        <t>requires a relation sufficient to compare the material semantic values across the two records.</t>
+        <t>A shared identifier establishes correlation, not semantic consistency.</t>
+      </section>
+      <section anchor="a-3-recovered-task-unresolved-external-effect">
+        <name>Recovered Task, Unresolved External Effect</name>
+        <t>A dialog and outstanding task are restored after a failure. A downstream operation had been invoked before the failure, but its response was lost.</t>
+        <t>The recovered task state can be sufficient for continuity while the provider-side effect remains unresolved.</t>
+        <t>Retry policy and provider semantics are outside this document.</t>
+      </section>
+      <section anchor="a-4-correlation-does-not-establish-derivation">
+        <name>Correlation Does Not Establish Derivation</name>
+        <t>An Action Record contains a valid parent reference to an Interaction Record.</t>
+        <t>The reference can establish correlation or predecessor identity. It does not by itself establish that the interaction content produced, transformed, selected, or caused the action.</t>
+        <t>A stronger derivation or causation conclusion requires additional Evidence Relations.</t>
+      </section>
+      <section anchor="a-5-conflicting-evidence">
+        <name>Conflicting Evidence</name>
+        <t>Two applicable, authentic records make incompatible assertions about the same provider operation at the same as-of time: one states that its effect was committed before that time, while the other states that its effect had never been committed by that time. Both use the same operation identity and native effect semantics.</t>
+        <t>This is conflicting evidence about one proposition. In contrast, an agent-side timeout and a provider-side committed effect can both be accurate observations at different boundaries; different result strings alone do not establish a conflict.</t>
+        <t>This document defines no universal rule selecting one source as authoritative.</t>
+      </section>
+      <section anchor="a-6-valid-evidence-bound-to-the-wrong-context">
+        <name>Valid Evidence Bound to the Wrong Context</name>
+        <t>A signed authorization verdict verifies correctly. It was issued for destination A but is presented as evidence for destination B.</t>
+        <t>The Evidence Verification Result can be successful while Evidence Applicability fails.</t>
+        <t>If the format carries no destination binding, the association can remain unsupported rather than contradicted. A positively identified mismatch, absence of the required binding, and inability to perform the binding check are separate findings.</t>
+      </section>
+      <section anchor="a-7-produced-record-required-recipient-or-holder">
+        <name>Produced Record, Required Recipient or Holder</name>
+        <t>A service P produces confirmation C. The Audit Task asks whether C was delivered to recipient R by a stated deadline and retained by holder H for a stated interval. The Evidence Requirement Set identifies R and H and the evidence that qualifies for each property.</t>
+        <t>The auditor obtains C from intermediary M. Even if C's producer and relation to the audited transaction are verified, its presence at M does not establish delivery to R or retention by H. Evidence of delivery to M does not, by itself, satisfy a requirement for delivery to R and does not, by itself, establish that no delivery to R occurred.</t>
+        <t>If a source necessary to establish delivery to R or retention by H cannot be checked, and no alternative sufficient Evaluation Basis is available, that part of the audit remains incomplete or Unresolved. The result reports C as available and the delivery or retention requirement as unresolved, rather than reporting C as absent or delivery as failed.</t>
+        <t>Evidence of receipt at one time does not by itself establish retention for a later interval.</t>
+        <t>This example applies the producer and required-recipient-or-holder distinction proposed by Francesco Marinoni Moretto and refined with Iman Schrock <xref target="MORETTO-RECIPIENT"/>. It expresses auditing questions and evidence conditions without prescribing an expected-record declaration mechanism.</t>
+      </section>
+      <section anchor="a-8-declined-action-and-conditional-effect-evidence">
+        <name>Declined Action and Conditional Effect Evidence</name>
+        <t>The Audit Task asks whether request R reached a terminal outcome under an identified workflow policy. Its Evidence Requirement Set requires evidence of the decision and makes evidence of a downstream effect conditional on the applicable workflow branch.</t>
+        <t>Suppose the Evaluation Basis establishes, under the applicable native semantics, a verified refusal by a party authorized to decide R, bound to the exact requested action. This can satisfy the decision-evidence requirement; signature validity or the label <tt>denied</tt> alone does not establish those conditions.</t>
+        <t>The effect-evidence requirement is inapplicable only if the Evidence Requirement Set or referenced profile explicitly defines this refusal as a terminal condition for this Audit Task, and the Evaluation Basis establishes that the condition applies. The result preserves the refusal, the applicable condition, and the reason no effect evidence is required for that branch.</t>
+        <t>Without that explicit rule, or when the refusal, authority, or exact-action binding cannot be established, the refusal does not remove the effect-evidence requirement. A refusal for a different action cannot satisfy the decision requirement for R.</t>
+        <t>Even with a terminal-refusal rule, the separate Audit Task "Did R produce effect E?" is not answered by the refusal alone. The refusal does not establish execution, an external effect, or their non-occurrence. Material evidence of an effect cannot be discarded solely because the policy names refusal as terminal.</t>
+        <t>The declined-action case was proposed by Henri Sirkkavaara <xref target="SIRKKAVAARA-REFUSAL"/>. Iman Schrock clarified the distinction between satisfying a decision requirement and conditionally removing an effect requirement <xref target="SCHROCK-REFUSAL"/>. The task-relative formulation here does not define their proposed declaration mechanism.</t>
+      </section>
+    </section>
+    <section anchor="audit-task-card">
+      <name>Audit Task Card</name>
+      <t>The following non-normative template can be used in requirements, implementation, or interoperability discussions.</t>
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Question</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Audit Task</td>
+            <td>What question is being evaluated?</td>
+          </tr>
+          <tr>
+            <td>Audit Scope</td>
+            <td>Which actors, events, states, resources, relationships, and time are in scope?</td>
+          </tr>
+          <tr>
+            <td>Audit Evidence Set</td>
+            <td>Which Audit Evidence Items are available to this auditor?</td>
+          </tr>
+          <tr>
+            <td>Evidence Requirement Set(s)</td>
+            <td>Which sets and versions apply, which alternative evidence combinations are sufficient, and which explicit conditions make individual requirements apply?</td>
+          </tr>
+          <tr>
+            <td>Evidence Production Expectation</td>
+            <td>Who is expected to produce, deliver, receive, or retain the evidence, on what basis and by what deadline or for what interval?</td>
+          </tr>
+          <tr>
+            <td>Evidence Source</td>
+            <td>Who is responsible for the asserted or observed information?</td>
+          </tr>
+          <tr>
+            <td>Control over evidence</td>
+            <td>Who controlled the relevant observation, production, or disclosure path?</td>
+          </tr>
+          <tr>
+            <td>Observation Boundary</td>
+            <td>Where can the relevant fact be observed?</td>
+          </tr>
+          <tr>
+            <td>Evidence Coverage</td>
+            <td>Which event classes, paths, resources, and intervals are represented as covered, and what supports that coverage for the audited interval?</td>
+          </tr>
+          <tr>
+            <td>Evidence Relation</td>
+            <td>Which bindings or relationships must be established?</td>
+          </tr>
+          <tr>
+            <td>Carrier Mapping / Profile</td>
+            <td>If a concrete carrier is used, which mapping or profile version gives its fields, references, and checks their task-relevant semantics?</td>
+          </tr>
+          <tr>
+            <td>Evidence Verification Result</td>
+            <td>Which checks were performed, and what did they establish under which assumptions and limits? If omission is claimed detectable, by whom or what mechanism?</td>
+          </tr>
+          <tr>
+            <td>Evidence Applicability</td>
+            <td>Does each item apply to the audited subject, role, destination, time, and context, including any required recipient or holder?</td>
+          </tr>
+          <tr>
+            <td>Search Basis / Completion</td>
+            <td>When absence matters, which sources, query, cutoff, and as-of meaning apply? Was the search complete for each source, and what limits remain?</td>
+          </tr>
+          <tr>
+            <td>Evaluation Basis</td>
+            <td>Which evidence, verification results, procedures, profiles, selection rules, and assumptions were actually used?</td>
+          </tr>
+          <tr>
+            <td>Audit Evaluation Result</td>
+            <td>Who produced the result, what conclusion follows, at what time, and with what limitations or grounds for conditional non-applicability?</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section anchor="non-inference-checklist">
+      <name>Non-Inference Checklist</name>
+      <t>This compact checklist groups the distinctions developed above; it defines no additional requirements.</t>
+      <ol>
+        <li>
+          <t>A valid signature or authentic record does not establish the truth of every assertion or its applicability to the audited subject, time, or event.</t>
+        </li>
+        <li>
+          <t>Authorization, policy decision, invocation, execution, and external effect are different facts. Evidence of one does not by itself establish the others.</t>
+        </li>
+        <li>
+          <t>Correlation, ordering, a parent reference, or one local delegation relation does not establish derivation, causation, semantic consistency, or uninterrupted end-to-end authority.</t>
+        </li>
+        <li>
+          <t>Verifying all available items does not establish collection completeness. Declared coverage, a post-hoc expectation, or an incomplete search does not justify non-occurrence or cross-source absence.</t>
+        </li>
+        <li>
+          <t>Independent verification and independence from later cooperation do not establish independent observation or evidence production.</t>
+        </li>
+        <li>
+          <t>A negative check, an unevaluated check, and an Unresolved Audit Task differ. Failure of one candidate basis does not exclude all other sufficient bases.</t>
+        </li>
+        <li>
+          <t>Current state does not establish historical state. Propagating or aggregating a result does not remove the need to preserve its source, task, scope, time, basis, and limitations.</t>
+        </li>
+        <li>
+          <t>A carrier, wrapper, common identifier, or successful parsing result does not strengthen an Observation Boundary or Evidence Relation, or establish semantic interoperability.</t>
+        </li>
+      </ol>
+    </section>
+    <section anchor="acknowledgments" numbered="false">
+      <name>Acknowledgments</name>
+      <t>Discussions in the AUDIT and agent2agent communities helped shape this document. The author thanks Mirja Kuehlewind and Henk Birkholz for discussion of the problem space and verification boundaries; Francesco Marinoni Moretto and Sumit Ahuja for expected-record and cross-domain auditing discussions; and Henri Sirkkavaara, Nancy Sahu, and Gareth Wong for discussions of coverage and the meaning and limits of verification.</t>
+      <t>Iman Schrock clarified bounded absence versus incomplete observation and proposed related conformance cases. The unavailable-source example reflects that contribution. Sumit Ahuja highlighted why a relation presented at one crossing does not by itself establish an uninterrupted relation across earlier crossings. Parisa Foroughi clarified the separation of authorization evidence from post-action and accountability evidence.</t>
+      <t>Francesco Marinoni Moretto contributed the required-recipient-or-holder case, and Henri Sirkkavaara contributed the declined-action case. Iman Schrock refined the producer, holder, and searched-source distinction and the conditions under which refusal satisfies a decision requirement while a downstream effect requirement is inapplicable. The additional examples reflect these contributions to the discussion developed with Sumit Ahuja.</t>
+      <t>The distinction between independence from later cooperation and independence of evidence production was clarified through an exchange with Douglas Wadkins in connection with his action-determinability work <xref target="WADKINS"/>. These acknowledgments identify contributions and do not imply endorsement of this revision, authorship of other material, or agreement by a working group.</t>
+    </section>
+  </back>
+</rfc>
