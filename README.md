@@ -1,5 +1,10 @@
 # Task-Relative Evidence Requirements for Agent Auditing
 
+An individual Internet-Draft on the evidence needed to answer specific
+questions about agent activity across administrative domains.
+
+[![Build and check draft](https://github.com/MikhailSergeev369/draft-audit-task-requirements/actions/workflows/build.yml/badge.svg?branch=main&event=push)](https://github.com/MikhailSergeev369/draft-audit-task-requirements/actions/workflows/build.yml)
+
 Public editing workspace for **draft-sergeev-audit-task-requirements**,
 an individual Internet-Draft by **Mikhail Sergeev**, with intended status
 **Informational**. It is not an adopted working-group document or an IETF
@@ -7,9 +12,17 @@ consensus statement.
 
 **Published baseline:** revision **-00**, posted to the IETF archive on
 **16 October 2026**. The date inside the document is 15 October 2026.
-This repository starts with the exact published XML and TXT, not a new revision.
+The public workspace was initialized from the exact published XML and TXT;
+subsequent changes to the working source are not a new IETF publication.
 
 ## Read, review, and contribute
+
+**To read or comment, no installation is needed.** Start with the
+[published HTML](https://www.ietf.org/archive/id/draft-sergeev-audit-task-requirements-00.html)
+or the [editor's reading copy](review/editor-copy.md), then
+[open a feedback issue](https://github.com/MikhailSergeev369/draft-audit-task-requirements/issues/new?template=feedback.md)
+or reply by email. A section reference and a concrete question or suggested
+change are enough; writing code or opening a pull request is not required.
 
 | Resource | Purpose |
 | --- | --- |
@@ -43,6 +56,13 @@ artifacts and results. Expected-record declarations are discussed in section
 mechanism. Attribution in the published acknowledgments is preserved.
 
 ## Edit and build
+
+**This is a document repository, not an agent-auditing software implementation.**
+The Python files in `tools/` and `tests/` support document preparation: generating
+the reading copy, checking links and archive hashes, running the official
+xml2rfc formatter, and comparing revisions. They do not evaluate agent actions
+or implement the draft's audit model. The build badge reports those editorial
+checks, not protocol conformance or approval of the document.
 
 Python **3.12** is the CI environment; the formatter is pinned in
 `requirements.txt`. The reading-copy and source-integrity commands use only

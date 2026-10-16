@@ -2,3 +2,10 @@
 # Preserve official archive bytes on every platform.
 published/00/*.xml -text
 published/00/*.txt -text
+
+# Count the actual RFCXML manuscript as a source, not only the build tooling.
+/draft-sergeev-audit-task-requirements.xml linguist-detectable=true
+# Do not count the frozen duplicate publication as another source language.
+published/** linguist-documentation=true
+# Generated from the XML; keep its diff collapsed unless a reviewer expands it.
+review/editor-copy.md linguist-generated=true
