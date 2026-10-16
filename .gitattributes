@@ -1,0 +1,4 @@
+* text=auto eol=lf
+# Preserve official archive bytes on every platform.
+published/00/*.xml -text
+published/00/*.txt -text

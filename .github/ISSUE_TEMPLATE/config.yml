@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: AUDIT mailing list
+    url: https://mailarchive.ietf.org/arch/browse/audit/
+    about: Public discussion archive; email feedback to audit@ietf.org is welcome.
