@@ -1,0 +1,15 @@
+# One-time initialization requested by the owner; removed after successful release.
+name: Initialize published -00 release
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/initial-release-00.yml']
+permissions:
+  contents: write
+jobs:
+  release:
+    uses: ./.github/workflows/release.yml
+    with:
+      revision: '00'
+      target_commit: a69970eb459870ef910651a03d5e54727295e3f9
+      notes: 'First individual Internet-Draft, posted to the IETF archive on 16 October 2026. Task-relative evidence requirements, evidence-production expectations, and bounded audit results. Includes the distinctions between a completed search and incomplete observation, and the relationship to expected-record declarations and native evidence specifications.'

@@ -27,6 +27,7 @@ change are enough; writing code or opening a pull request is not required.
 | Resource | Purpose |
 | --- | --- |
 | [Published -00](https://datatracker.ietf.org/doc/draft-sergeev-audit-task-requirements/00/) | The authoritative IETF revision |
+| [GitHub releases](https://github.com/MikhailSergeev369/draft-audit-task-requirements/releases) | Revision tags, release notes, and byte-verified XML/TXT downloads |
 | [Published HTML](https://www.ietf.org/archive/id/draft-sergeev-audit-task-requirements-00.html) | Read the published document |
 | [Editor's reading copy](review/editor-copy.md) | Generated from the working XML; not a separate published revision |
 | [Working RFCXML](draft-sergeev-audit-task-requirements.xml) | The only editable manuscript source |
@@ -90,6 +91,28 @@ the model, legal clearance, interoperability, or IETF acceptance. They do not
 claim a fresh online idnits run or bibliographic review. The normal IETF checks
 and author confirmation still apply when submitting a future revision.
 
+## GitHub releases
+
+Release titles follow the I-D revision (`-00`, `-01`, ...); tags use the full
+document name, such as `draft-sergeev-audit-task-requirements-00`. Each release
+records an already posted IETF revision and includes its XML, TXT, and
+`SHA256SUMS`. The IETF archive remains authoritative.
+
+For a future revision, first complete the ordinary IETF submission and keep its
+exact files and checksum list under `published/NN/`, without changing older
+snapshots. From Actions, run
+[Release a published IETF revision](https://github.com/MikhailSergeev369/draft-audit-task-requirements/actions/workflows/release.yml)
+on `main`, entering the two-digit revision and the full commit SHA containing
+that source and snapshot. A short revision summary is optional.
+
+The workflow verifies both files against the live IETF archive before creating
+the GitHub release, then downloads the release assets to check them again.
+It refuses a mismatched existing tag or assets rather than overwriting them.
+Rerunning a matching release verifies it without publishing a duplicate.
+Network failure or different bytes stop the operation. No release is created
+by an ordinary commit, pull request, or tag push; future releases are explicitly
+started by a maintainer. No extra signed form or CLA is required.
+
 ## Revision policy
 
 The root XML is the working source for future edits. `published/00/` is frozen;
@@ -97,9 +120,11 @@ do not update it when preparing -01. Label a future revision in the working
 source before submission, leaving already posted files unchanged. Until
 Datatracker actually posts that revision, it remains editor's work in progress.
 
-No workflow sends email, submits to Datatracker, creates a release or tag,
-or merges a pull request. Continuous integration has read-only repository
-permissions. Publication and access changes are separate maintainer actions.
+No workflow sends email, submits to Datatracker, or merges a pull request.
+Ordinary editorial CI retains read-only repository permissions. Only the
+separate release job has contents-write permission to create the requested
+GitHub tag, release, and assets; it does not change manuscript files or access
+settings. GitHub releases do not replace IETF submission or author confirmation.
 
 The public history begins at the published document. No earlier private Git
 history, private correspondence, unpublished partner text, or research logs
