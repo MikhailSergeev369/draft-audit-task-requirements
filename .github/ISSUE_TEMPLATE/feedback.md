@@ -3,11 +3,12 @@ name: Draft feedback
 about: A question, counterexample, or proposed correction
 ---
 
-## Section or auditing question
+## Draft revision and section
 
-## Observation or proposed change
+## Observation or auditing question
 
-## Example and public references
+## Example, public reference, or suggested wording (optional)
 
-Please keep private correspondence and sensitive evidence out of public issues.
-See CONTRIBUTING.md; feedback by email is also welcome.
+A question is enough; no patch or implementation is required. Please keep
+private correspondence and sensitive evidence out of public issues.
+See CONTRIBUTING.md and ISSUE-PROCESS.md; feedback by email is welcome.

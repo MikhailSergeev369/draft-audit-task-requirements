@@ -129,3 +129,9 @@ settings. GitHub releases do not replace IETF submission or author confirmation.
 The public history begins at the published document. No earlier private Git
 history, private correspondence, unpublished partner text, or research logs
 are imported. See [LICENSE.md](LICENSE.md) for document and tooling terms.
+
+## External feedback
+
+[ISSUE-PROCESS.md](ISSUE-PROCESS.md) describes how reports receive a public
+disposition, how changes are checked, and when an issue can be closed.
+Questions and counterexamples are welcome; a patch is not required.

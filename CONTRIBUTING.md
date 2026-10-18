@@ -41,3 +41,9 @@ with the IETF participation guidelines linked from the Note Well.
 
 There is no separate CLA, signed editor-decision form, or automatic publication
 approval in this repository. Ordinary IETF contributor obligations remain.
+
+## External reports and dispositions
+
+See [ISSUE-PROCESS.md](ISSUE-PROCESS.md) for response targets, review,
+public dispositions, closure, and the distinction between working changes
+and a posted I-D. Questions by issue or email are welcome without a patch.
