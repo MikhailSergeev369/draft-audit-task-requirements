@@ -15,6 +15,11 @@ consensus statement.
 The public workspace was initialized from the exact published XML and TXT;
 subsequent changes to the working source are not a new IETF publication.
 
+**Working revision:** editor's work in progress for **-01**, including the
+decision-time input clarification proposed in
+[Issue #1](https://github.com/MikhailSergeev369/draft-audit-task-requirements/issues/1).
+It has not been submitted to or published by the IETF.
+
 ## Read, review, and contribute
 
 **To read or comment, no installation is needed.** Start with the

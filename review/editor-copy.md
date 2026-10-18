@@ -2,7 +2,7 @@
 
 **Generated editor's reading copy, not a separate IETF publication.**
 
-Source SHA-256: `e83c17d6a43fe66a010502655a94dae067195b36e9001f9f8de11e5fb164dc5a`. Edit the [RFCXML](../draft-sergeev-audit-task-requirements.xml), not this file.
+Source SHA-256: `4e82b2e915450be128d82a2b77990a00b67e2204fcdd8b7d7ed98bfe29830590`. Edit the [RFCXML](../draft-sergeev-audit-task-requirements.xml), not this file.
 
 [Published -00](https://datatracker.ietf.org/doc/draft-sergeev-audit-task-requirements/00/) · [Contributing](../CONTRIBUTING.md)
 
@@ -15,6 +15,8 @@ This document describes a representation-independent model for stating an Audit 
 ## Discussion Venues
 
 This is an individual working draft, not a working-group document.
+
+This editor's work in progress is intended for revision -01. It has not been submitted to or published by the IETF; revision -00 remains the published baseline.
 
 Related discussion is archived on the [AUDIT mailing list](https://mailarchive.ietf.org/arch/browse/audit/). Discussion does not establish IETF or working-group consensus.
 
@@ -288,6 +290,12 @@ The following distinctions concern different aspects of an audit. They are not v
 
 **Negative Observation:** An Audit Evidence Item affirmatively records a negative event, state, or result within an applicable Observation Boundary.
 
+*Decision-time input non-establishment.* An available Audit Evidence Item can report that an input required by the applicable decision procedure was not established by the participant by the time of an identified decision. An unsuccessful attempt to obtain or evaluate that input, a check that was not performed, and an unspecified cause are distinct conditions. A completed check returning a usable negative result is not input non-establishment merely because the checked condition was not affirmed. The available evidence and stated assumptions determine which of these descriptions is supported.
+
+Where material to the Audit Task, the Evaluation Basis identifies the applicable procedure or policy and the basis for requiring the input, together with the participant, decision, input, relevant time and Observation Boundary. It also identifies the evidence or stated assumptions supporting the reported condition, cause and relation to the decision, including any claim of decision-time recording. The procedure's need for an input is distinct from the auditor's Evidence Requirement Set. This description prescribes no result code, record format, or admission policy.
+
+A qualifying decision record can support a task about the decision and its stated grounds without supplying separately required evidence of the input condition. Finding that record does not establish that the search for other required evidence is complete. A record of a retrieval timeout can be a Negative Observation about that retrieval without establishing revocation.
+
 *Evaluation status and conflicts.*
 
 **Unresolved:** The Evaluation Basis does not support a sufficiently grounded positive or negative conclusion for the Audit Task. An Unresolved result is not a Negative Observation and does not by itself refute the proposition being evaluated.
@@ -511,6 +519,14 @@ The Audit Task is:
 An Evidence Requirement Set can require evidence of the historical authorization context, including the applicable status input, whether the status answer met the freshness conditions applicable at admission time, and the relation between that information and the admission decision. The Evaluation Basis identifies the evidence and material assumptions actually used to evaluate that requirement.
 
 A negative state observed at audit time does not establish the historical state. Identifying a status source that was consulted does not establish that its answer met the freshness conditions applicable at admission time. Failure to obtain such an answer is not the same fact as a negative authorization result. A record of admission does not by itself establish that the authorization state used was sufficiently current at admission time.
+
+Separate illustrative cases distinguish the content of a status result from failure to establish a required input. A completed check returning a negative result usable under the applicable procedure supplies an input result; its native semantics determine whether it means revocation, expiry, or another condition. A generic negative status value does not, by itself, establish revocation.
+
+In a different case, suppose a participant records a refusal because a required status retrieval timed out and no alternative input usable under its procedure was established by the decision time. An applicable record can report decision-time input non-establishment as described in [evidence-availability-states](#evidence-availability-states). Its origin, relation to the identified decision, timing and observation limits determine its use in the Evaluation Basis. Such a record can answer a task about the decision and its stated grounds without establishing the historical authorization state or absence of a downstream effect; see [a-8-declined-action-and-conditional-effect-evidence](#a-8-declined-action-and-conditional-effect-evidence). A record made later about the same event does not, by itself, establish decision-time recording.
+
+Conversely, suppose a participant used a positive status answer accepted by its procedure, while a subsequent revocation was not yet discoverable to that participant. Non-discovery alone establishes neither decision-time input non-establishment nor correctness of the authorization decision. The relevant freshness and admission rules remain material; this document does not require a live status query for every decision.
+
+Other sufficient historical evidence can later resolve the auditor's status question without changing what the participant had established at decision time. Finding a decision record does not complete an otherwise incomplete search for that historical evidence. These cases are illustrative, not an exhaustive set of authorization outcomes.
 
 If the applicable historical state cannot be reconstructed, the correct Audit Evaluation Result can remain **Unresolved**.
 
@@ -1001,13 +1017,15 @@ This compact checklist groups the distinctions developed above; it defines no ad
 3. Correlation, ordering, a parent reference, or one local delegation relation does not establish derivation, causation, semantic consistency, or uninterrupted end-to-end authority.
 4. Verifying all available items does not establish collection completeness. Declared coverage, a post-hoc expectation, or an incomplete search does not justify non-occurrence or cross-source absence.
 5. Independent verification and independence from later cooperation do not establish independent observation or evidence production.
-6. A negative check, an unevaluated check, and an Unresolved Audit Task differ. Failure of one candidate basis does not exclude all other sufficient bases.
+6. A completed negative check differs from a decision-time report that no usable input result was established. Such a report does not, by itself, establish why the input was not established or determine the later Audit Evaluation Result. Other sufficient historical evidence can resolve the input question without changing what the participant had established at decision time. An unevaluated check and an Unresolved Audit Task also differ. Failure of one candidate basis does not exclude all other sufficient bases.
 7. Current state does not establish historical state. Propagating or aggregating a result does not remove the need to preserve its source, task, scope, time, basis, and limitations.
 8. A carrier, wrapper, common identifier, or successful parsing result does not strengthen an Observation Boundary or Evidence Relation, or establish semantic interoperability.
 
 <a id="acknowledgments"></a>
 
 # Acknowledgments
+
+Lars Kersten Kroehl identified the need to distinguish recorded decision-time non-establishment of a required input from the auditor's later evidence-search outcomes.
 
 Discussions in the AUDIT and agent2agent communities helped shape this document. The author thanks Mirja Kuehlewind and Henk Birkholz for discussion of the problem space and verification boundaries; Francesco Marinoni Moretto and Sumit Ahuja for expected-record and cross-domain auditing discussions; and Henri Sirkkavaara, Nancy Sahu, and Gareth Wong for discussions of coverage and the meaning and limits of verification.
 
