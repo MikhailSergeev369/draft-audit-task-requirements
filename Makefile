@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: all review check test build
+.PHONY: all review check test build site
 all: check test build
 
 review:
@@ -14,3 +14,7 @@ test:
 
 build:
 	$(PYTHON) tools/draft.py build
+
+# Requires a successful make build and full git history for pinned candidates.
+site:
+	$(PYTHON) tools/site.py
