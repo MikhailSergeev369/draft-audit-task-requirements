@@ -1,45 +1,45 @@
-# Audit Store: минимальная правка кандидата -01
+# Audit Store: minimal change for the -01 candidate
 
-Подготовлено 20 октября 2026 года. Сохранено как материал для подготовки следующего кандидата -01; не опубликовано как новая ревизия I-D. Правка не интегрирована в корневой исходник и исходный PR #3.
+Prepared on 20 October 2026. Stored as material for preparing the next -01 candidate; not published as a new I-D revision. The change has not been integrated into the root source or the original PR #3.
 
-Ветка хранения: `preparation/audit-store-query-20261020`. Каталог содержит зафиксированный снимок для сверки; это не второй редактируемый исходник документа. Дальнейшую интеграцию следует выполнять через основной RFCXML и отдельный focused PR согласно правилам репозитория.
+Storage branch: `preparation/audit-store-query-20261020`. This directory contains a pinned snapshot for comparison; it is not a second editable manuscript source. Further integration should use the primary RFCXML source and a separate focused PR, in accordance with the repository rules.
 
-База: draft PR #3 репозитория MikhailSergeev369/draft-audit-task-requirements, commit 4f60a2329a447e6b7c97b5508ecf4ff31a5b1ddb.
-SHA-256 исходного XML: 895bf6162942d455538092003eae3572f1fb57e53e93ffc3db57d82abebd9406.
+Base: draft PR #3 in MikhailSergeev369/draft-audit-task-requirements, commit 4f60a2329a447e6b7c97b5508ecf4ff31a5b1ddb.
+Base XML SHA-256: 895bf6162942d455538092003eae3572f1fb57e53e93ffc3db57d82abebd9406.
 
-## Изменения
+## Changes
 
-- §5.3: добавлен абзац об источниках, критериях и временных границах поиска, его завершённости и существенных ограничениях. Контекст может передаваться в ответе либо определяться применимым профилем вместе с информацией о конкретном ответе. Формат запроса и ответа не определяется.
-- §4.2: существующий пример двух источников дополнен следствием для интерфейса: пустой набор записей сам по себе не различает завершённый и неполный поиск. Добавлена ссылка на §5.3.
-- Security Considerations оставлен без изменений: уже охватывает ложные сообщения о поиске и необходимость учитывать доказательства или существенные допущения в Evaluation Basis.
+- §5.3: adds a paragraph on search sources, criteria, time bounds, completeness, and material limitations. The context may be conveyed in the response or established by the applicable profile together with information about the particular response. No request or response format is defined.
+- §4.2: extends the existing two-source example with an interface implication: an empty record set alone does not distinguish a complete search from an incomplete one. Adds a reference to §5.3.
+- Security Considerations is unchanged: it already covers false search reports and the need to account for evidence or material assumptions in the Evaluation Basis.
 
-Новые поля, статусы, API, требования к инфраструктуре и BCP 14 keywords не вводятся. Все прежние изменения кандидата PR #3 сохранены. Дата и номер версии не менялись: это редакторский кандидат, не новая опубликованная ревизия.
+No new fields, statuses, APIs, infrastructure requirements, or BCP 14 keywords are introduced. All prior changes in the PR #3 candidate are preserved. The date and version number are unchanged: this is an editorial candidate, not a newly published revision.
 
-## Проверка
+## Validation
 
-Проверены синтаксис XML, разрешение внутренних ссылок, ограничение изменений двумя разделами и точное применение патча к исходному XML. Проверка является редакторской, не тестом соответствия протоколу. При первоначальной подготовке и при сохранении этого пакета xml2rfc был недоступен; сборка TXT/HTML и idnits для изменённого XML не выполнялись. Успешные проверки исходного PR #3 не являются проверками этого изменённого XML.
+Checks covered XML syntax, internal reference resolution, changes being limited to two sections, and exact application of the patch to the base XML. These are editorial checks, not protocol conformance tests. During initial preparation and when this package was stored, xml2rfc was unavailable; TXT/HTML builds and idnits were not run on the modified XML. Successful checks on the original PR #3 do not validate this modified XML.
 
-## Иллюстративная проверка смысла
+## Illustrative semantic check
 
-При одинаковых критериях и cutoff: (1) первый источник полностью просмотрен, второй недоступен — пустой ответ не подтверждает завершённый поиск по обоим; (2) оба источника полностью просмотрены без совпадений — возможен Expected but Not Found в рамках применимой production expectation. Ни один случай сам по себе не доказывает, что Gateway не принимал решения.
+With identical criteria and cutoff: (1) the first source has been fully searched and the second is unavailable — an empty response does not establish a complete search across both sources; (2) both sources have been fully searched with no matches — Expected but Not Found may apply under the applicable production expectation. Neither case, by itself, proves that the Gateway made no decision.
 
-В комплекте: изменённый XML и unified diff относительно указанной базы.
-## Идентичность и повторная проверка при сохранении
+The package includes the modified XML and a unified diff against the stated base.
+## Identity and repeat checks when stored
 
-Пакет получен из `AUDIT_store_query_candidate.zip` (SHA-256 `87dd12642fb5f9c99a97bb00263f30344614a3cdb45e04d3709326dde62824e5`). XML и патч сохранены без изменения байтов; README уточнён для размещения в репозитории.
+The package was obtained from `AUDIT_store_query_candidate.zip` (SHA-256 `87dd12642fb5f9c99a97bb00263f30344614a3cdb45e04d3709326dde62824e5`). The XML and patch were preserved byte for byte; the README was clarified for inclusion in the repository.
 
-- [Исходная база PR #3](https://github.com/MikhailSergeev369/draft-audit-task-requirements/blob/4f60a2329a447e6b7c97b5508ecf4ff31a5b1ddb/draft-sergeev-audit-task-requirements.xml): 98 986 байт, SHA-256 `895bf6162942d455538092003eae3572f1fb57e53e93ffc3db57d82abebd9406`.
-- [XML с дополнением](draft-sergeev-audit-task-requirements.xml): 99 901 байт, SHA-256 `d82a747d3bd88c1cd8861ff79d8790ab7550e5503220df66ef841095f8bf5445`.
-- [Патч](audit-store-query.patch): SHA-256 `a6a8ca6d5c42fff34aa79e990b486a5791998c6d2a61c213e2de3ea527971204`.
-- [SHA256SUMS](SHA256SUMS) позволяет проверить локальные файлы командой `sha256sum -c SHA256SUMS` из этого каталога.
+- [Original PR #3 base](https://github.com/MikhailSergeev369/draft-audit-task-requirements/blob/4f60a2329a447e6b7c97b5508ecf4ff31a5b1ddb/draft-sergeev-audit-task-requirements.xml): 98 986 bytes, SHA-256 `895bf6162942d455538092003eae3572f1fb57e53e93ffc3db57d82abebd9406`.
+- [XML with the addition](draft-sergeev-audit-task-requirements.xml): 99 901 bytes, SHA-256 `d82a747d3bd88c1cd8861ff79d8790ab7550e5503220df66ef841095f8bf5445`.
+- [Patch](audit-store-query.patch): SHA-256 `a6a8ca6d5c42fff34aa79e990b486a5791998c6d2a61c213e2de3ea527971204`.
+- [SHA256SUMS](SHA256SUMS) allows local files to be checked by running `sha256sum -c SHA256SUMS` in this directory.
 
-20 октября 2026 года исходный XML повторно получен по указанному commit и сверен по SHA-256. Проверены прямое и обратное применение патча с побайтовым совпадением, синтаксис XML, уникальность 86 anchors и разрешение всех 28 xrefs. Изменения ограничены разделами с anchors `expected-evidence-across-administrative-domains` (§4.2) и `collection-and-query-interfaces` (§5.3). Это проверки целостности и редакторской структуры, не независимое семантическое ревью и не conformance suite.
+On 20 October 2026, the base XML was fetched again at the stated commit and verified by SHA-256. Checks covered forward and reverse patch application with byte-for-byte equality, XML syntax, uniqueness of 86 anchors, and resolution of all 28 xrefs. Changes are limited to the sections with anchors `expected-evidence-across-administrative-domains` (§4.2) and `collection-and-query-interfaces` (§5.3). These are integrity and editorial structure checks, not an independent semantic review or a conformance suite.
 
-## Учёт при подготовке следующего кандидата
+## Use when preparing the next candidate
 
-1. Использовать patch как предлагаемое дополнение к точной базе PR #3, а не как замену текущего корневого XML на `main`: на момент сохранения `main` ещё содержит -00.
-2. Если рабочая база изменилась, сопоставить оба изменяемых раздела и сохранить все промежуточные правки и атрибуции. Само успешное применение патча не заменяет эту сверку.
-3. После интеграции в основной исходник выполнить `make review`, `make check`, `make test` и сборку закреплённой версией xml2rfc; сформировать новый кандидат и его контрольные суммы. Перед подачей выполнить актуальный idnits и обычную проверку публикации.
-4. Учесть этот пакет вместе с остальными замечаниями к -01. Он сохраняет только согласованное дополнение Audit Store и не подтверждает, что все прочие замечания к будущей ревизии уже учтены.
+1. Use the patch as a proposed addition to the exact PR #3 base, rather than as a replacement for the current root XML on `main`: when the package was stored, `main` still contained -00.
+2. If the working base has changed, compare both affected sections and preserve all intervening changes and attributions. Successful patch application alone does not replace this comparison.
+3. After integration into the primary source, run `make review`, `make check`, `make test`, and a build with the pinned xml2rfc version; produce a new candidate and its checksums. Before submission, run a current idnits check and the usual publication checks.
+4. Consider this package together with the other comments on -01. It preserves only the agreed Audit Store addition and does not establish that all other comments on the future revision have been addressed.
 
-Сохранение пакета не меняет pinned preview PR #3, опубликованный -00, теги или релизы и не выполняет подачу I-D.
+Storing the package does not change the pinned PR #3 preview, the published -00, tags, or releases, and does not submit an I-D.
