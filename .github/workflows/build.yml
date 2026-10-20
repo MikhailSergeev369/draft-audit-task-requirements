@@ -36,7 +36,7 @@ jobs:
           python tools/site.py --fetch-candidates
           make site
       - name: Preserve review site
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: editor-site-${{ github.sha }}-${{ github.run_attempt }}
           path: _site/
@@ -44,12 +44,12 @@ jobs:
           retention-days: 14
       - name: Prepare Pages deployment
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site/
       - name: Preserve public renderings and diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: editor-build-${{ github.sha }}-${{ github.run_attempt }}
           path: build/

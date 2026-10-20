@@ -40,10 +40,13 @@ code { overflow-wrap: anywhere; } .meta { font-size: .85rem; }
 
 
 def page(title: str, body: str) -> str:
+    footer = (f'<footer><p><a href="{REPO}/blob/main/CONTRIBUTING.md">Contributing and Note Well</a> · '
+              f'<a href="{REPO}/blob/main/LICENSE.md">Document and tooling terms</a> · '
+              f'<a href="{REPO}/blob/main/PUBLICATION-PROCESS.md">Publication process</a></p></footer>')
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{html.escape(title)}</title><style>{CSS}</style></head>'
-            f'<body><main><h1>{html.escape(title)}</h1>{body}</main></body></html>\n')
+            f'<body><main><h1>{html.escape(title)}</h1>{body}</main>{footer}</body></html>\n')
 
 
 class ReadingText(HTMLParser):
@@ -73,7 +76,8 @@ class ReadingText(HTMLParser):
             return
         if (tag in {"head", "script", "style", "nav"}
                 or attr.get("id", "").startswith(("section-toc", "section-boilerplate"))
-                or set(attr.get("class", "").split()) & {"pilcrow", "toplink"}):
+                or "hidden" in attr
+                or set(attr.get("class", "").split()) & {"pilcrow", "toplink", "ears"}):
             if tag not in self.void:
                 self.skip = depth
             return
@@ -133,7 +137,7 @@ def text_diff(old: str, new: str, old_label: str, new_label: str) -> str:
     body = ('<nav><a href="index.html">Version overview</a><a href="draft.html">Read this version</a>'
             '<a href="source-diff.patch">XML source diff from -00</a></nav>'
             f'<p>From <strong>{html.escape(old_label)}</strong> to <strong>{html.escape(new_label)}</strong>.</p>'
-            '<p>Comparison of visible text from xml2rfc HTML. Generated contents, IETF boilerplate, '
+            '<p>Comparison of document text from xml2rfc HTML. Generated contents, print headers/footers, IETF boilerplate, '
             'pilcrows and ordinary whitespace are excluded; external link targets are retained. '
             'Use the XML diff for markup, metadata and structural changes.</p>')
     if not groups:
@@ -220,9 +224,18 @@ def write_version(directory: Path, outputs: dict, baseline: dict, label: str, co
     decorated, count = re.subn(r'(<body\b[^>]*>)', lambda m: m[1] + banner, outputs["html"].decode(), count=1)
     if count != 1:
         raise ValueError("Missing HTML body for version banner")
+    # The formatter's source filename differs from the public download name.
+    decorated, source_links = re.subn(
+        r'<link href="[^"]+" rel="alternate" type="application/rfc\+xml">',
+        '<link href="draft.xml" rel="alternate" type="application/rfc+xml">', decorated)
+    if source_links != 1:
+        raise ValueError("Expected one RFCXML alternate link")
     served = dict(outputs, html=decorated.encode())
     for ext, data in served.items():
         (directory / f"draft.{ext}").write_bytes(data)
+    # xml2rfc links this optional override sheet; keep that resource resolvable.
+    (directory / "rfc-local.css").write_text(
+        "/* No local overrides: use the embedded xml2rfc styles. */\n", encoding="utf-8")
     old_xml = baseline["xml"].decode()
     new_xml = outputs["xml"].decode()
     patch = ''.join(difflib.unified_diff(old_xml.splitlines(True), new_xml.splitlines(True),
@@ -272,8 +285,11 @@ class LinkParser(HTMLParser):
         attrs = dict(attrs)
         if "id" in attrs:
             self.ids.add(attrs["id"])
-        if tag == "a" and attrs.get("href"):
+        if tag in {"a", "link"} and attrs.get("href"):
             self.links.append(attrs["href"])
+        for name in ("src", "poster"):
+            if attrs.get(name):
+                self.links.append(attrs[name])
 
 
 def check_links(directory: Path) -> None:
@@ -358,7 +374,7 @@ def build_site() -> None:
         if destination.exists():
             shutil.rmtree(destination)
         shutil.copytree(site, destination)
-    print(f"PASS: site built with {len(identities)} versions; all local links and fragments resolve")
+    print(f"PASS: site built with {len(identities)} versions; local href/src/poster targets and HTML fragments resolve")
 
 
 if __name__ == "__main__":

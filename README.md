@@ -43,8 +43,9 @@ The site distinguishes the published -00, the working text from `main`, and
 selected review candidates. A candidate is pinned to the commit and XML hash
 listed in [review/candidates.json](review/candidates.json); its preview does
 not track later PR edits automatically or imply acceptance. Check its linked
-PR for the current discussion. Until the first Pages deployment, use the
-GitHub reading copy or download the `editor-site` artifact from a successful CI run.
+PR for the current discussion. The site is live. If it is temporarily unavailable,
+use the GitHub reading copy or the `editor-site` artifact from a successful CI run.
+See [review status](review/README.md) for the purpose of retained proposal branches.
 
 For a focused review, start with these sections:
 
@@ -58,6 +59,8 @@ welcome: [AUDIT mailing list](mailto:audit@ietf.org),
 or [the editor](mailto:mikhailsergeev369@gmail.com).
 GitHub participation is not required. Repository merges are editorial decisions,
 not working-group decisions or contributor endorsements.
+The [publication process](PUBLICATION-PROCESS.md) explains preparation,
+author decisions, submission and verification of a posted revision.
 
 ## Scope
 
@@ -94,8 +97,8 @@ python -m pip install -r requirements.txt
 make review     # refresh the GitHub-readable Markdown
 make check      # source links, archive hashes, reading-copy consistency
 make test       # tooling regression tests, not protocol conformance
+# Commit the reviewed manuscript and regenerated reading copy before these steps.
 make build      # official xml2rfc TXT/HTML, repeated in one environment
-# Commit manuscript edits before building a site with exact source-commit links.
 python tools/site.py --fetch-candidates  # fetch the configured commit pins
 make site       # editor site, readable comparisons, and pinned candidates
 ```
@@ -117,7 +120,7 @@ is not committed. CI also preserves this directory as an `editor-site` artifact.
 ## Editor site deployment
 
 One-time setup: select **Settings → Pages → Build and deployment → Source →
-GitHub Actions**. Once this workflow is merged, a successful push or manual
+GitHub Actions** (already configured for this repository). A successful push or manual
 run on `main` builds and deploys the editor site. A pull request builds a
 downloadable review artifact; it does not deploy the site. The deployment
 job uses the `github-pages` environment and follows its protection rules.
@@ -126,6 +129,16 @@ Pages exposes the latest successful build, so check the source commit shown
 on the page when discussing a revision. Updating a candidate means deliberately
 updating its pin in `review/candidates.json` after reviewing that revision.
 Publishing an editor site does not submit an Internet-Draft or create a release.
+
+The site build checks local `href`, `src` and `poster` targets and HTML fragments.
+It does not crawl external sites or parse arbitrary CSS/JavaScript references.
+The readable comparison excludes xml2rfc print headers and footers; use the
+XML diff for structural changes. Before posting a new I-D revision, review the
+site's published-version links and comparison baseline, currently fixed at -00.
+
+Dependabot proposes weekly GitHub Actions and formatter updates. Review and
+test each proposal; updates are not automatically merged. Actions stay pinned
+to full commit SHAs and the formatter stays pinned to an exact version.
 
 These checks concern source integrity and rendering, not the correctness of
 the model, legal clearance, interoperability, or IETF acceptance. They do not

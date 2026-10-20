@@ -16,6 +16,27 @@ spec.loader.exec_module(site)
 
 
 class ReadingSite(unittest.TestCase):
+    def test_print_furniture_is_not_a_text_change(self):
+        before = '<table class="ears"><tr><td>Expires Monday [Page]</td></tr></table><p>Same text</p>'
+        after = before.replace('Monday', 'Tuesday')
+        self.assertEqual(site.reading_blocks(before), ['Same text'])
+        self.assertIn('No reading-text changes', site.text_diff(before, after, 'old', 'new'))
+
+    def test_missing_local_resources_fail(self):
+        for markup in ('<link rel="stylesheet" href="missing.css">',
+                       '<script src="missing.js"></script>', '<img src="missing.png">',
+                       '<video poster="missing.png"></video>'):
+            with self.subTest(markup=markup), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / 'index.html').write_text(markup)
+                with self.assertRaisesRegex(ValueError, 'Broken local link'):
+                    site.check_links(root)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'index.html').write_text('<link rel="stylesheet" href="style.css">')
+            (root / 'style.css').write_text('/* optional overrides */')
+            site.check_links(root)
+
     def test_diff_ignores_navigation_but_keeps_prose_and_link_targets(self):
         document = ('<html><head><title>ignore</title></head><body>'
                     '<section id="section-toc.1"><p>ignore TOC</p></section>'

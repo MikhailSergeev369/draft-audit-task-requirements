@@ -11,7 +11,7 @@ See [LICENSE.md](LICENSE.md) for the separate tooling license.
 
 ## A useful contribution
 
-Identify the section or stable XML anchor, the ambiguity or claim at issue,
+Identify the draft revision or source commit, the section or stable XML anchor, the ambiguity or claim at issue,
 and a concrete example or proposed wording. Link public sources when relevant.
 An issue or an email is enough to start; a pull request is not required.
 
