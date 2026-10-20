@@ -1,0 +1,28 @@
+--- a/draft-sergeev-audit-task-requirements.xml
++++ b/draft-sergeev-audit-task-requirements.xml
+@@ -396,6 +396,7 @@
+         <t>If no applicable specification, profile, agreement, commitment, or policy called for a Gateway record for R, that record was <strong>Not Expected</strong>. Non-participation in a particular audit mechanism does not, by itself, establish that no production expectation applied. The available evidence can still be insufficient for the full Audit Task.</t>
+         <t>If the available information does not establish whether an Evidence Production Expectation applied to R, the state is <strong>Expectation Undetermined</strong>. Uncertainty about effective coverage does not, by itself, make a known production expectation undetermined.</t>
+         <t>A further case illustrates <strong>Expected but Search Incomplete</strong> under the applicable production expectation. Suppose the gateway slot is empty, one declared source has been searched completely, and another declared source is unavailable. The auditor can report that no qualifying record was found in the first source for the declared query and cutoff. The cross-source audit remains incomplete or Unresolved; it does not support a bounded-absence finding over all declared sources. A bounded-absence finding requires the applicable search to be complete over all declared sources for the declared query and cutoff. This distinction follows the proposed conformance cases in <xref target="IMAN-CASES"/>.</t>
++        <t>For an Audit Store query interface, an empty set of returned records alone does not distinguish this incomplete search from a completed search with no qualifying records across both declared sources. Interpreting the response depends on preserving that distinction (see <xref target="collection-and-query-interfaces"/>).</t>
+         <t>This example shows why evidence requirements, production expectations, and coverage cannot be collapsed into one concept.</t>
+       </section>
+       <section anchor="historical-authorization-state">
+@@ -475,7 +476,8 @@
+         <name>Collection and Query Interfaces</name>
+         <t>The model can provide requirements input to future collection or Audit Store interfaces.</t>
+         <t>An auditor can require evidence from identified sources, for a specified interval and event class, with specified relations and, where necessary, identified record or profile forms.</t>
+-        <t>This document does not define how such a request is encoded or transmitted.</t>
++        <t>Interpreting a query response can depend on which declared sources were searched, the applied matching criteria and time boundaries, whether the applicable search was completed, and any material access or search limitations. Such information can be conveyed in the response or established by an applicable profile together with response-specific information. This allows an auditor to distinguish a completed search with no qualifying records from an incomplete search, without treating either result as proof that the underlying event did not occur.</t>
++        <t>This document does not define how such requests or responses are encoded or transmitted.</t>
+       </section>
+       <section anchor="interoperability-and-conformance-reports">
+         <name>Interoperability and Conformance Reports</name>
+@@ -524,6 +526,7 @@
+         <t>The architecture described in <xref target="AUDIT-ARCH"/> identifies roles, audit record classes, audit context propagation, and supporting services. The model in this document can support the Auditor's evaluation by making the auditing question, evidence requirements, production expectations, and Evaluation Basis explicit. It does not introduce an additional architectural role or replace the architecture's record classes. References to an evaluator describe the evaluation function, not an additional role.</t>
+         <t>Interaction, Action, Delegation, and Authorization Transition Records can be considered as Audit Evidence Items, together with receipts, Attestation Results, disclosed portions of records, and other relevant observations. The required combination depends on the Audit Task; this model does not require every record class for every task.</t>
+         <t>Audit context can provide identifiers and references used when evaluating Evidence Relations. Audit Scope identifies what is being evaluated. A common identifier does not by itself establish derivation, causation, semantic consistency, or sufficient evidence for the Audit Task. The semantics of each record and reference remain those defined by the applicable specification or profile.</t>
++        <t>The Auditor-facing query interface proposed as WI-4 in Section 6 of <xref target="AUDIT-ARCH"/> is one point of application for this model. The query-response considerations in <xref target="collection-and-query-interfaces"/> identify search scope, completion, and limitations that can be material to the Auditor's Evaluation Basis.</t>
+       </section>
+       <section anchor="rats">
+         <name>RATS</name>

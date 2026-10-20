@@ -1,0 +1,10 @@
+--- a/draft-sergeev-audit-task-requirements.xml
++++ b/draft-sergeev-audit-task-requirements.xml
+@@ -526,6 +526,7 @@
+         <t>The architecture described in <xref target="AUDIT-ARCH"/> identifies roles, audit record classes, audit context propagation, and supporting services. The model in this document can support the Auditor's evaluation by making the auditing question, evidence requirements, production expectations, and Evaluation Basis explicit. It does not introduce an additional architectural role or replace the architecture's record classes. References to an evaluator describe the evaluation function, not an additional role.</t>
+         <t>Interaction, Action, Delegation, and Authorization Transition Records can be considered as Audit Evidence Items, together with receipts, Attestation Results, disclosed portions of records, and other relevant observations. The required combination depends on the Audit Task; this model does not require every record class for every task.</t>
+         <t>Audit context can provide identifiers and references used when evaluating Evidence Relations. Audit Scope identifies what is being evaluated. A common identifier does not by itself establish derivation, causation, semantic consistency, or sufficient evidence for the Audit Task. The semantics of each record and reference remain those defined by the applicable specification or profile.</t>
++        <t>The Auditor-facing query interface proposed as WI-4 in Section 6 of <xref target="AUDIT-ARCH"/> is one point of application for this model. The query-response considerations in <xref target="collection-and-query-interfaces"/> identify search scope, completion, and limitations that can be material to the Auditor's Evaluation Basis.</t>
+       </section>
+       <section anchor="rats">
+         <name>RATS</name>

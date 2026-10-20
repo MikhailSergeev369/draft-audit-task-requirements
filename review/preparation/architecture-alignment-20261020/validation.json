@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-20",
+  "base_package_commit": "4d48cfff09a3b13deb1166d18f7c742c63fffe77",
+  "base_xml_sha256": "d82a747d3bd88c1cd8861ff79d8790ab7550e5503220df66ef841095f8bf5445",
+  "architecture_commit": "2ab1e6c57e18285e2e9d99f1d82ba7e99c50ffd6",
+  "pr3_base_commit": "4f60a2329a447e6b7c97b5508ecf4ff31a5b1ddb",
+  "candidate_xml_sha256": "5c94a3d22f8f20bb127cfc5b960362704960651b4818761a182e71caa231b8c0",
+  "candidate_bytes": 100249,
+  "incremental_scope": "one paragraph appended to section 6.1 (audit-architecture); removing exactly that paragraph reproduces base bytes",
+  "combined_scope": [
+    "4.2",
+    "5.3",
+    "6.1"
+  ],
+  "patch_forward_and_reverse": "passed for incremental and combined patches",
+  "unique_anchors": 86,
+  "resolved_xrefs": 30,
+  "xml_parse": "passed",
+  "xml2rfc": "not run; unavailable",
+  "idnits": "not run",
+  "independent_semantic_review": "not claimed"
+}
