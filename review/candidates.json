@@ -1,0 +1,11 @@
+{
+  "candidates": [
+    {
+      "pr": 3,
+      "commit": "4f60a2329a447e6b7c97b5508ecf4ff31a5b1ddb",
+      "source_sha256": "895bf6162942d455538092003eae3572f1fb57e53e93ffc3db57d82abebd9406",
+      "title": "Recorded decision-time non-establishment",
+      "summary": "Proposed clarification in sections 2.15 and 4.3, Appendix C, and acknowledgments. See PR #3 for the discussion and current review status."
+    }
+  ]
+}

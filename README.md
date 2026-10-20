@@ -18,8 +18,9 @@ subsequent changes to the working source are not a new IETF publication.
 ## Read, review, and contribute
 
 **To read or comment, no installation is needed.** Start with the
-[published HTML](https://www.ietf.org/archive/id/draft-sergeev-audit-task-requirements-00.html)
-or the [editor's reading copy](review/editor-copy.md), then
+[editor site](https://MikhailSergeev369.github.io/draft-audit-task-requirements/),
+[published HTML](https://www.ietf.org/archive/id/draft-sergeev-audit-task-requirements-00.html),
+or [GitHub reading copy](review/editor-copy.md), then
 [open a feedback issue](https://github.com/MikhailSergeev369/draft-audit-task-requirements/issues/new?template=feedback.md)
 or reply by email. A section reference and a concrete question or suggested
 change are enough; writing code or opening a pull request is not required.
@@ -29,11 +30,27 @@ change are enough; writing code or opening a pull request is not required.
 | [Published -00](https://datatracker.ietf.org/doc/draft-sergeev-audit-task-requirements/00/) | The authoritative IETF revision |
 | [GitHub releases](https://github.com/MikhailSergeev369/draft-audit-task-requirements/releases) | Revision tags, release notes, and byte-verified XML/TXT downloads |
 | [Published HTML](https://www.ietf.org/archive/id/draft-sergeev-audit-task-requirements-00.html) | Read the published document |
+| [Editor's HTML](https://MikhailSergeev369.github.io/draft-audit-task-requirements/editor/draft.html) | Latest successfully deployed working text from `main` |
+| [Readable changes from -00](https://MikhailSergeev369.github.io/draft-audit-task-requirements/editor/changes.html) | Review text changes without XML markup |
+| [Pinned review candidates](https://MikhailSergeev369.github.io/draft-audit-task-requirements/#candidates) | Separate previews of selected PR revisions, with their source commits |
 | [Editor's reading copy](review/editor-copy.md) | Generated from the working XML; not a separate published revision |
 | [Working RFCXML](draft-sergeev-audit-task-requirements.xml) | The only editable manuscript source |
 | [Frozen XML/TXT and checksums](published/00/) | Exact published baseline for comparisons |
 | [Issues](https://github.com/MikhailSergeev369/draft-audit-task-requirements/issues) / [pull requests](https://github.com/MikhailSergeev369/draft-audit-task-requirements/pulls) | Questions, counterexamples, and proposed edits |
 | [Builds and review artifacts](https://github.com/MikhailSergeev369/draft-audit-task-requirements/actions/workflows/build.yml) | Generated XML/TXT/HTML, source diff from -00, and build logs |
+
+The site distinguishes the published -00, the working text from `main`, and
+selected review candidates. A candidate is pinned to the commit and XML hash
+listed in [review/candidates.json](review/candidates.json); its preview does
+not track later PR edits automatically or imply acceptance. Check its linked
+PR for the current discussion. Until the first Pages deployment, use the
+GitHub reading copy or download the `editor-site` artifact from a successful CI run.
+
+For a focused review, start with these sections:
+
+- Architecture and Audit Store: section 6.1, then 4.2 and 5.3.
+- Expected Records: section 3.2, then 4.2 and 6.7.
+- First reading: Key Separations, then the refund examples in section 4.
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md). Feedback by email is equally
 welcome: [AUDIT mailing list](mailto:audit@ietf.org),
@@ -78,6 +95,9 @@ make review     # refresh the GitHub-readable Markdown
 make check      # source links, archive hashes, reading-copy consistency
 make test       # tooling regression tests, not protocol conformance
 make build      # official xml2rfc TXT/HTML, repeated in one environment
+# Commit manuscript edits before building a site with exact source-commit links.
+python tools/site.py --fetch-candidates  # fetch the configured commit pins
+make site       # editor site, readable comparisons, and pinned candidates
 ```
 
 Open `build/index.html` locally. Each successful CI artifact includes the exact
@@ -85,6 +105,27 @@ working XML, both renderings, the diff from published -00, resolved package
 versions, source/output hashes, and formatter logs. Generated build files are
 not committed. Network access is needed to install dependencies; manuscript
 rendering disables network reference resolution and local-file includes.
+
+Open `_site/index.html` for the complete review site. Building candidate
+previews needs the pinned commits locally; use a full clone, or fetch those
+commits with `python tools/site.py --fetch-candidates` before `make site`.
+Run `make build` again after a commit so its build identity is current.
+Only their manuscript XML is read: the current
+checkout's tools and formatter build every preview. `_site/` is generated and
+is not committed. CI also preserves this directory as an `editor-site` artifact.
+
+## Editor site deployment
+
+One-time setup: select **Settings → Pages → Build and deployment → Source →
+GitHub Actions**. Once this workflow is merged, a successful push or manual
+run on `main` builds and deploys the editor site. A pull request builds a
+downloadable review artifact; it does not deploy the site. The deployment
+job uses the `github-pages` environment and follows its protection rules.
+
+Pages exposes the latest successful build, so check the source commit shown
+on the page when discussing a revision. Updating a candidate means deliberately
+updating its pin in `review/candidates.json` after reviewing that revision.
+Publishing an editor site does not submit an Internet-Draft or create a release.
 
 These checks concern source integrity and rendering, not the correctness of
 the model, legal clearance, interoperability, or IETF acceptance. They do not
@@ -121,10 +162,12 @@ source before submission, leaving already posted files unchanged. Until
 Datatracker actually posts that revision, it remains editor's work in progress.
 
 No workflow sends email, submits to Datatracker, or merges a pull request.
-Ordinary editorial CI retains read-only repository permissions. Only the
-separate release job has contents-write permission to create the requested
-GitHub tag, release, and assets; it does not change manuscript files or access
-settings. GitHub releases do not replace IETF submission or author confirmation.
+The build job retains read-only repository permissions. The separate Pages
+deployment job has Pages and OIDC permissions; it cannot edit repository
+contents. Only the release job has contents-write permission to create the
+requested GitHub tag, release, and assets; it does not change manuscript files
+or access settings. GitHub releases do not replace IETF submission or author
+confirmation.
 
 The public history begins at the published document. No earlier private Git
 history, private correspondence, unpublished partner text, or research logs
