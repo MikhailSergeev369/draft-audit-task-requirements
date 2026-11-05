@@ -2,7 +2,7 @@
 
 **Generated editor's reading copy, not a separate IETF publication.**
 
-Source SHA-256: `e83c17d6a43fe66a010502655a94dae067195b36e9001f9f8de11e5fb164dc5a`. Edit the [RFCXML](../draft-sergeev-audit-task-requirements.xml), not this file.
+Source SHA-256: `895bf6162942d455538092003eae3572f1fb57e53e93ffc3db57d82abebd9406`. Edit the [RFCXML](../draft-sergeev-audit-task-requirements.xml), not this file.
 
 [Published -00](https://datatracker.ietf.org/doc/draft-sergeev-audit-task-requirements/00/) · [Contributing](../CONTRIBUTING.md)
 
@@ -288,6 +288,14 @@ The following distinctions concern different aspects of an audit. They are not v
 
 **Negative Observation:** An Audit Evidence Item affirmatively records a negative event, state, or result within an applicable Observation Boundary.
 
+**Recorded Decision-Time Non-Establishment:** An Audit Evidence Item reports that a participant could not establish an identified input required under the applicable decision procedure and conditions by the time of an identified decision. This describes the participant's reported evaluation state, not a negative determination of the underlying condition or a finding about the auditor's later search. A missing result or a check that was not performed does not, by itself, establish such an inability.
+
+Decision-time refers to the reported state at the decision, not necessarily to when the item was produced. Any claim that the item was produced at that time requires supporting evidence or stated assumptions in the Evaluation Basis.
+
+A qualifying item can satisfy a requirement to record the decision and its stated grounds without satisfying a separate requirement to establish the input itself. Its use remains subject to Evidence Applicability and the Evaluation Basis, including the applicable decision procedure and conditions, source and decision-time bindings, and the grounds for relying on the participant's account. Finding the item does not establish that the search for other required items or sources is complete.
+
+A record of a retrieval timeout can also be a Negative Observation about that retrieval without establishing that the authorization was revoked. These descriptions are not mutually exclusive. The originating specification or policy remains authoritative for the participant's decision semantics; this distinction defines no required record field or operational refusal policy.
+
 *Evaluation status and conflicts.*
 
 **Unresolved:** The Evaluation Basis does not support a sufficiently grounded positive or negative conclusion for the Audit Task. An Unresolved result is not a Negative Observation and does not by itself refute the proposition being evaluated.
@@ -513,6 +521,14 @@ An Evidence Requirement Set can require evidence of the historical authorization
 A negative state observed at audit time does not establish the historical state. Identifying a status source that was consulted does not establish that its answer met the freshness conditions applicable at admission time. Failure to obtain such an answer is not the same fact as a negative authorization result. A record of admission does not by itself establish that the authorization state used was sufficiently current at admission time.
 
 If the applicable historical state cannot be reconstructed, the correct Audit Evaluation Result can remain **Unresolved**.
+
+For comparison, consider a separate illustrative refusal case. Under policy P, participant G requires a usable status result for request R and refuses when no result permitted by P is available. A status query times out, no permitted result is available to G, and G records its refusal, the affected input and source, the attempted check, the decision time, and the timeout. The attempt time does not establish an as-of time for a status result that was not obtained. The example requires neither a live query for every decision nor a particular record format.
+
+Suppose the auditor obtains this record and establishes its origin and relation to the identified decision for R. Under the applicable native semantics and stated assumptions, a qualifying item can satisfy an Evidence Requirement Set for the Audit Task "What decision and grounds did G record for R?" Whether G actually performed the reported check depends on the evidence and stated assumptions supporting that assertion; an independent witness is not required for every Audit Task. The separate Audit Task "Was the authorization revoked at that time?" remains Unresolved unless another sufficient Evaluation Basis is available. Such historical evidence does not establish that G possessed or used it at decision time.
+
+In the paired case, a completed check returns an applicable negative status result and G records it as the reason for refusal. For example, the native semantics of the result can explicitly support the assertion that the relevant authorization was revoked with effect at the decision time. A generic negative result need not support that more specific assertion. Both cases record refusal, but only the completed check supplies the negative status result. Neither refusal alone establishes non-occurrence of an external effect; the conditions for an inapplicable downstream effect requirement remain as described in [a-8-declined-action-and-conditional-effect-evidence](#a-8-declined-action-and-conditional-effect-evidence).
+
+Failure to discover a revocation is not, by itself, recorded decision-time non-establishment. A participant may have completed the applicable check using a positive status result accepted by that procedure while a change was not yet reflected in the information available to it. A failed optional refresh also does not establish that the required input was unavailable when another result remained permitted by policy. Neither case alone settles the historical authorization question or the correctness of the participant's decision.
 
 <a id="illustrative-refund-evaluation"></a>
 
@@ -1001,7 +1017,7 @@ This compact checklist groups the distinctions developed above; it defines no ad
 3. Correlation, ordering, a parent reference, or one local delegation relation does not establish derivation, causation, semantic consistency, or uninterrupted end-to-end authority.
 4. Verifying all available items does not establish collection completeness. Declared coverage, a post-hoc expectation, or an incomplete search does not justify non-occurrence or cross-source absence.
 5. Independent verification and independence from later cooperation do not establish independent observation or evidence production.
-6. A negative check, an unevaluated check, and an Unresolved Audit Task differ. Failure of one candidate basis does not exclude all other sufficient bases.
+6. A negative check, a recorded inability to establish a required input at decision time, an unevaluated check, and an Unresolved Audit Task differ. A found record of such an inability does not establish the input itself. An Audit Task concerning the historical input condition can be resolved using other sufficient evidence without establishing that the participant possessed or used that evidence at decision time. Failure of one candidate basis does not exclude all other sufficient bases.
 7. Current state does not establish historical state. Propagating or aggregating a result does not remove the need to preserve its source, task, scope, time, basis, and limitations.
 8. A carrier, wrapper, common identifier, or successful parsing result does not strengthen an Observation Boundary or Evidence Relation, or establish semantic interoperability.
 
@@ -1014,5 +1030,7 @@ Discussions in the AUDIT and agent2agent communities helped shape this document.
 Iman Schrock clarified bounded absence versus incomplete observation and proposed related conformance cases. The unavailable-source example reflects that contribution. Sumit Ahuja highlighted why a relation presented at one crossing does not by itself establish an uninterrupted relation across earlier crossings. Parisa Foroughi clarified the separation of authorization evidence from post-action and accountability evidence.
 
 Francesco Marinoni Moretto contributed the required-recipient-or-holder case, and Henri Sirkkavaara contributed the declined-action case. Iman Schrock refined the producer, holder, and searched-source distinction and the conditions under which refusal satisfies a decision requirement while a downstream effect requirement is inapplicable. The additional examples reflect these contributions to the discussion developed with Sumit Ahuja.
+
+Lars Kersten Kroehl identified the need to distinguish recorded decision-time non-establishment of a required input from the auditor's later evidence-search outcomes.
 
 The distinction between independence from later cooperation and independence of evidence production was clarified through an exchange with Douglas Wadkins in connection with his action-determinability work [WADKINS](#WADKINS). These acknowledgments identify contributions and do not imply endorsement of this revision, authorship of other material, or agreement by a working group.
